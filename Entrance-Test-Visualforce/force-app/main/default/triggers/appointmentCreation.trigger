@@ -1,19 +1,18 @@
 trigger appointmentCreation on Appointment__c (before insert) {
-    /*for (Appointment__c a : [SELECT Doctor__r.Name, Appointment_Date__c
-                             FROM Appointment__c
-                             WHERE Doctor__r.Name
-                             IN :Trigger.new]) {
-		Trigger.new.get(a.Doctor__r.Name).addError(
-            'Cannot create an appointment. The doctor already has and appointment for this time.');
-	}*/
-    for (Appointment__C a : [SELECT Doctor__r.Name
-                             FROM Appointment__c
-                             WHERE Name='Hyppocrate']) {
-    	System.debug('a');                             
+    Datetime newAppointmentDate = Trigger.new[0].Appointment_Date__c;
+    
+    List<Appointment__c> appointments = [SELECT Doctor__r.Id, Appointment_Date__c, Duration_in_minutes__c
+                                         FROM Appointment__c
+                                         WHERE Doctor__r.Id = :Trigger.new[0].Doctor__c];
+    
+    for (Appointment__c appointment : appointments) {
+        Integer existingAppointmentDuration = (Integer) appointment.Duration_in_minutes__c;
+		Datetime existingAppointmentDate = appointment.Appointment_Date__c;
+        
+		if (newAppointmentDate >= existingAppointmentDate && 
+            newAppointmentDate <= existingAppointmentDate.addMinutes(existingAppointmentDuration)) {
+            Trigger.new[0].addError('Appointment for this doctor on this time already exists. ' + 
+                                    'Please, choose another time.');
+        }
 	}
 }
-
-// Создать Apex Trigger, запрещающий создание записи Appointment,
-// если у доктора уже есть Appointment на это же время
-// 
-// Appointment__c.Doctor__c уже есть Appointment__c.Appointment_Date__c

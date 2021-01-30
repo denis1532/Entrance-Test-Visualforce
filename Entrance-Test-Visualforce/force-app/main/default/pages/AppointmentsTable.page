@@ -1,11 +1,19 @@
-<apex:page controller="AppointmentsController">
-    <style type="text/css">
-    	.popup {background-color: white; border-width: 2px; border-style: solid; z-index: 9999; left: 50%; padding:11px; position: absolute; width: 600px; margin-left: -240px; top:100px;} 
-    	.popupBackground {background-color:black; opacity: 0.20; filter: alpha(opacity = 20); position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 9998;} 
-    </style>
-    
+<apex:page docType="html-5.0" controller="AppointmentsController">
     <apex:form >
     	<apex:pageBlock id="appointments_list" title="Appointments table" >
+            
+            <!-- Pagination buttons -->
+            <apex:pageBlockButtons location="bottom" >
+                <apex:outputText >Page {! pageNumber } #  of {! totalSize } <br /><br /></apex:outputText>
+                
+                <apex:outputPanel id="navigation">
+                    <apex:commandButton action="{! Beginning}" title="First Page" value="<<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation"/>
+                    <apex:commandButton action="{! Previous }" title="Previous Page" value="<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation"/>        
+                    <apex:commandButton action="{! Next }" title="Next Page" value=">" disabled="{! disableNextEnd }" reRender="appointments_list, navigation"/>
+                    <apex:commandButton action="{! End }" title="Last Page" value=">>" disabled="{! disableNextEnd }" reRender="appointments_list, navigation"/>        
+                </apex:outputPanel>
+            </apex:pageBlockButtons>
+            
             <!-- Doctors' picklist -->
             <apex:pageBlockSection columns="1">
             	<apex:selectList id="option" value="{! selectedDocName }" label="Select a doctor" size="1" multiselect="false">
@@ -21,10 +29,12 @@
             </apex:pageBlockSection>
             
             <!-- Working Hours section -->
-            <!-- <apex:pageBlockSection columns="1" >
-                <apex:outputField value="{! apps.Doctor__r.Working_Hours_Start__c}" label="Working Hours Start" />
-				<apex:outputField value="{! apps.Doctor__r.Working_Hours_Start__c}" label="Working Hours End" />
-            </apex:pageBlockSection> -->
+            <apex:pageBlockSection columns="1" >
+                <apex:repeat var="hour" value="{! hours }" >
+                    <apex:outputField value="{! hour.Working_Hours_Start__c }" label="Working Hours Start" />
+                    <apex:outputField value="{! hour.Working_Hours_End__c }" label="Working Hours End" />
+                </apex:repeat>
+            </apex:pageBlockSection>
             
             <!-- Patients' picklist -->
             <apex:pageBlockSection columns="1" >
@@ -33,6 +43,24 @@
                     <apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:selectList>
             </apex:pageBlockSection>
+            
+            <!-- Add New Patient button -->
+            <apex:pageBlockSection columns="1" >
+            	<apex:commandButton action="{! URLFOR($Action.Patient__c.New) }" reRender="appointments_list" value="Add New Patient" />
+            </apex:pageBlockSection>
+            
+            <!-- Date section
+            <apex:pageBlockSection columns="1">
+            	<apex:input type="datetime" value="{! dat }" label="Appointment Date 1" ></apex:input>
+                <apex:inputText value="{! dateName }" label="Appointment Date 2" size="10" id="demo" onfocus="DatePicker.pickDate(false, this, false);" />
+                <apex:inputField value="{! dateNameApp.Appointment_Date__c }" label="Appointment Date 3" showDatePicker="true" required="false" />
+            </apex:pageBlockSection> -->
+            
+            <!-- Duration section
+            <apex:pageBlockSection columns="1" >
+                <apex:inputText value="{! searchDuration }" label="Duration in minutes" ></apex:inputText>
+                <apex:actionSupport event="onchange" reRender="appointments_list" />
+            </apex:pageBlockSection> -->
             
             <!-- Add New Appointment button -->
             <apex:pageBlockSection columns="1" >
@@ -49,17 +77,17 @@
                 <!-- Doctor's Name column -->
                 <apex:column value="{! app.Doctor__r.Name }">
                 	<apex:facet name="header">
-                        <apex:commandLink action="{! sortOrder }" reRender="appointments_list" value="Doctor's Name">
-                        	<apex:param value="Doctor__r.Name" assignTo="{! sortByField }"></apex:param>
+                        <apex:commandLink action="{! sortByField }" reRender="appointments_list" value="Doctor's Name">
+                        	<apex:param value="Doctor__r.Name" assignTo="{! sortOrder }"></apex:param>
                         </apex:commandLink>
                     </apex:facet>
                 </apex:column>
                 
-                <!-- Patient column -->
+                <!-- Patient's Name column -->
                 <apex:column value="{! app.Patient__r.Name }">
                 	<apex:facet name="header">
-                        <apex:commandLink action="{! sortOrder }" reRender="appointments_list" value="Patient's Name">
-                        	<apex:param value="Patient__r.Name" assignTo="{! sortByField }"></apex:param>
+                        <apex:commandLink action="{! sortByField }" reRender="appointments_list" value="Patient's Name">
+                        	<apex:param value="Patient__r.Name" assignTo="{! sortOrder }"></apex:param>
                         </apex:commandLink>
                     </apex:facet>
                 </apex:column>
@@ -67,8 +95,8 @@
                 <!-- Date column -->
                 <apex:column value="{! app.Appointment_Date__c }">
                 	<apex:facet name="header">
-                        <apex:commandLink action="{! sortOrder }" reRender="appointments_list" value="Date">
-                        	<apex:param value="Appointment_Date__c" assignTo="{! sortByField }"></apex:param>
+                        <apex:commandLink action="{! sortByField }" reRender="appointments_list" value="Date">
+                        	<apex:param value="Appointment_Date__c" assignTo="{! sortOrder }"></apex:param>
                         </apex:commandLink>
                     </apex:facet>
                 </apex:column>
@@ -76,8 +104,8 @@
                 <!-- Duration column -->
                 <apex:column value="{! app.Duration_in_minutes__c } minutes">
                 	<apex:facet name="header">
-                        <apex:commandLink action="{! sortOrder }" reRender="appointments_list" value="Duration">
-                        	<apex:param value="Duration_in_minutes__c" assignTo="{! sortByField }"></apex:param>
+                        <apex:commandLink action="{! sortByField }" reRender="appointments_list" value="Duration">
+                        	<apex:param value="Duration_in_minutes__c" assignTo="{! sortOrder }"></apex:param>
                         </apex:commandLink>
                     </apex:facet>
                 </apex:column>
