@@ -40,7 +40,7 @@
             </apex:pageBlockSection>
             
             <!-- Table -->
-        	<apex:pageBlockTable value="{! apps }" var="app"> 
+        	<apex:pageBlockTable value="{! apps }" var="app" columnsWidth="12%, 22%, 22%, 22%, 22%" > 
                 <!-- Action column -->
                 <apex:column headerValue="Action">
                     <apex:outputLink value="/{!app.Id}">View</apex:outputLink>
