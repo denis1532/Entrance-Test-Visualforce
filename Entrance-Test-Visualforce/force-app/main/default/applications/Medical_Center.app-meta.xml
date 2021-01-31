@@ -14,7 +14,6 @@
     <navType>Standard</navType>
     <tabs>Doctor__c</tabs>
     <tabs>Patient__c</tabs>
-    <tabs>Appointment__c</tabs>
     <tabs>Appointments</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Medical_Center_UtilityBar</utilityBar>

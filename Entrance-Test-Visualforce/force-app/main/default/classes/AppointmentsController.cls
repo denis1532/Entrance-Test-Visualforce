@@ -12,17 +12,13 @@ public class AppointmentsController {
     // Sort order
     private String ascOrDesc;
     
-    // Pop-up
-    public Boolean displayAppPopup {get;set;}
-    public Boolean displayDocPopup {get;set;}
-    
     // Picklist options
     public String selectedDocName {get;set;}
     public String selectedPatientName {get;set;}
     
     /*** Tried to realize Appointment Date and Duration In Minutes fields in different ways, no result ***/
     
-    // Date search
+    /* // Date search
     public Datetime dat {get;set;}
     public Date dateName {get;set;}
     public String dateNameQuery;
@@ -30,13 +26,13 @@ public class AppointmentsController {
     
     // Duration search
     public Integer searchDuration {get;set;}
-    public String durationQuery;
+    public String durationQuery; */
     
     /*** ***/
     
     // Pagination
     private Integer counter = 0;
-    private Integer listSize = 3;
+    private Integer listSize = 10;
     public Integer totalSize {get;set;}
     
     /*** ---------- Main ---------- ***/
@@ -46,8 +42,10 @@ public class AppointmentsController {
         this.sortOrder = 'Doctor__r.Name';
         this.ascOrDesc = ' ASC ';
         this.doctorsQuery = '';
-        this.durationQuery = '';
+        // this.durationQuery = '';
     }
+    
+    /*** ---------- PICKLISTS ---------- ***/
     
     // Adding options to DOCTOR picklist
     public List<SelectOption> getSelectedDoc() {
@@ -69,6 +67,8 @@ public class AppointmentsController {
         return patients;
     }
 	
+    /*** ---------- ***/
+    
     // Table results
     public List<Appointment__c> getApps() {
         // Getting DOCTOR and PATIENT picklist value
@@ -86,7 +86,7 @@ public class AppointmentsController {
         query = 'SELECT Id, Doctor__r.Name, Doctor__r.Working_Hours_Start__c, Doctor__r.Working_Hours_End__c, Patient__r.Name, Appointment_Date__c, Duration_in_minutes__c  ' +
             	'FROM Appointment__c ' + 
             	doctorsQuery + 
-            	durationQuery + 
+            	/*durationQuery + */
             	'ORDER BY ' + sortOrder + ascOrDesc + 'NULLS LAST ' + 
             	'LIMIT :listSize OFFSET :counter';
 
@@ -94,8 +94,9 @@ public class AppointmentsController {
         List<Appointment__c> results = Database.query(query);
         
         // Pagination total pages variable
-        this.totalSize = Database.countQuery('SELECT Count() ' + 'FROM Appointment__c');
-        
+        String s = 'SELECT Count() ' + 'FROM Appointment__c ' + doctorsQuery /*+ durationQuery*/;
+        this.totalSize = Database.countQuery(s);
+
         return results;
     }
     

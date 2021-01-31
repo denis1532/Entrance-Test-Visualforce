@@ -1,21 +1,25 @@
 <apex:page docType="html-5.0" controller="AppointmentsController">
+    <style type="text/css">
+    	.pbTitle {display: none;}
+        .paginationBlock {text-align: center;}
+    </style>
+    
     <apex:form >
     	<apex:pageBlock id="appointments_list" title="Appointments table" >
             
             <!-- Pagination buttons -->
-            <apex:pageBlockButtons location="bottom" >
-                <apex:outputText >Page {! pageNumber } #  of {! totalSize } <br /><br /></apex:outputText>
-                
-                <apex:outputPanel id="navigation">
-                    <apex:commandButton action="{! Beginning}" title="First Page" value="<<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation"/>
+            <apex:pageBlockButtons location="bottom" styleClass="paginationBlock" >
+                <apex:outputPanel id="navigation" >
+                    <apex:commandButton action="{! Beginning }" title="First Page" value="<<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation"/>
                     <apex:commandButton action="{! Previous }" title="Previous Page" value="<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation"/>        
+                    	<apex:outputText >Page # {! pageNumber } of {! totalPages }</apex:outputText>
                     <apex:commandButton action="{! Next }" title="Next Page" value=">" disabled="{! disableNextEnd }" reRender="appointments_list, navigation"/>
                     <apex:commandButton action="{! End }" title="Last Page" value=">>" disabled="{! disableNextEnd }" reRender="appointments_list, navigation"/>        
                 </apex:outputPanel>
             </apex:pageBlockButtons>
             
             <!-- Doctors' picklist -->
-            <apex:pageBlockSection columns="1">
+            <apex:pageBlockSection columns="1" >
             	<apex:selectList id="option" value="{! selectedDocName }" label="Select a doctor" size="1" multiselect="false">
                     <apex:selectOptions value="{! selectedDoc }" />
                     <apex:actionSupport event="onchange" reRender="appointments_list" />
