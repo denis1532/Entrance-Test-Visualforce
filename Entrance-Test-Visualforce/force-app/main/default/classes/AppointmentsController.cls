@@ -7,6 +7,9 @@ public class AppointmentsController {
     public String doctorsQuery;
     public String workingHours;
     
+    // Total records query
+    public String totalRecordsNumber;
+    
     // Sort by field
     public String sortOrder {get;set;}
     // Sort order
@@ -22,11 +25,11 @@ public class AppointmentsController {
     public Datetime dat {get;set;}
     public Date dateName {get;set;}
     public String dateNameQuery;
-    public Appointment__c dateNameApp {get;set;}
+    public Appointment__c dateNameApp {get;set;}*/
     
     // Duration search
     public Integer searchDuration {get;set;}
-    public String durationQuery; */
+    public String durationQuery;
     
     /*** ***/
     
@@ -42,10 +45,13 @@ public class AppointmentsController {
         this.sortOrder = 'Doctor__r.Name';
         this.ascOrDesc = ' ASC ';
         this.doctorsQuery = '';
-        // this.durationQuery = '';
+        this.durationQuery = '';
+        this.searchDuration = null;
     }
     
-    /*** ---------- PICKLISTS ---------- ***/
+    /*** ---------- ***/
+    
+    /*** ---------- Picklists ---------- ***/
     
     // Adding options to DOCTOR picklist
     public List<SelectOption> getSelectedDoc() {
@@ -69,11 +75,14 @@ public class AppointmentsController {
 	
     /*** ---------- ***/
     
+    /*** ---------- Main ---------- ***/
+    
     // Table results
     public List<Appointment__c> getApps() {
         // Getting DOCTOR and PATIENT picklist value
         if (selectedDocName == null && selectedPatientName == null) {
             this.doctorsQuery = '';
+            this.durationQuery = '';
         } else {
             this.doctorsQuery = 'WHERE (' + 
                 (selectedDocName != null ? 'Doctor__r.Name = ' + '\'' + selectedDocName + '\'' : '') + 
@@ -82,20 +91,29 @@ public class AppointmentsController {
                 ') ';
         }
         
+        if (searchDuration == 0 || searchDuration == null) {
+            this.durationQuery = '';
+        } else {
+            this.durationQuery = (selectedDocName == null && selectedPatientName == null ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') ' : 'AND (Duration_in_minutes__c = ' + searchDuration + ') ');
+        }
+        
         // Customizing main query 
         query = 'SELECT Id, Doctor__r.Name, Doctor__r.Working_Hours_Start__c, Doctor__r.Working_Hours_End__c, Patient__r.Name, Appointment_Date__c, Duration_in_minutes__c  ' +
             	'FROM Appointment__c ' + 
             	doctorsQuery + 
-            	/*durationQuery + */
+            	durationQuery +
             	'ORDER BY ' + sortOrder + ascOrDesc + 'NULLS LAST ' + 
             	'LIMIT :listSize OFFSET :counter';
 
+        system.debug(query);
+        system.debug(searchDuration);
+        
         // Returning main query results
         List<Appointment__c> results = Database.query(query);
         
         // Pagination total pages variable
-        String s = 'SELECT Count() ' + 'FROM Appointment__c ' + doctorsQuery /*+ durationQuery*/;
-        this.totalSize = Database.countQuery(s);
+        totalRecordsNumber = 'SELECT Count() ' + 'FROM Appointment__c ' + doctorsQuery + durationQuery;
+        this.totalSize = Database.countQuery(totalRecordsNumber);
 
         return results;
     }
@@ -134,7 +152,22 @@ public class AppointmentsController {
 
 	/*** ---------- ***/
     
-    /*** PAGINATION ***/
+    /*** ---------- Duration field search buttons ---------- ***/
+    
+    public PageReference searchApp() {
+        counter = 0;
+        return null;
+    }
+    
+    public PageReference resetSearch() {
+        counter = 0;
+        this.searchDuration = null;
+        return null;
+    }
+    
+    /*** ---------- ***/
+    
+    /*** ---------- PAGINATION ---------- ***/
     
     // First Page
     public PageReference Beginning() { 
