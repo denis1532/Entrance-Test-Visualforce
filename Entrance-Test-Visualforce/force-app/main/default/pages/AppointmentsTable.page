@@ -25,7 +25,7 @@
             <apex:pageBlockSection columns="1" >
             	<apex:selectList id="option" value="{! selectedDocName }" label="Select a doctor" size="1" multiselect="false">
                     <apex:selectOptions value="{! selectedDoc }" />
-                    <apex:actionSupport event="onchange" reRender="appointments_table" />
+                    <apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:selectList>
             </apex:pageBlockSection>
             
@@ -47,7 +47,7 @@
             <apex:pageBlockSection columns="1" >
             	<apex:selectList id="option" value="{! selectedPatientName }" label="Select a patient" size="1" multiselect="false">
                     <apex:selectOptions value="{! selectedPatient }" />
-                    <apex:actionSupport event="onchange" reRender="appointments_table" />
+                    <apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:selectList>
             </apex:pageBlockSection>
             

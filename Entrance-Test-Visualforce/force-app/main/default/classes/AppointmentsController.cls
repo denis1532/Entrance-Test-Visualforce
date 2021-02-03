@@ -93,6 +93,7 @@ public class AppointmentsController {
         
         if (searchDuration == 0 || searchDuration == null) {
             this.durationQuery = '';
+            this.searchDuration = null;
         } else {
             this.durationQuery = (selectedDocName == null && selectedPatientName == null ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') ' : 'AND (Duration_in_minutes__c = ' + searchDuration + ') ');
         }
@@ -104,9 +105,6 @@ public class AppointmentsController {
             	durationQuery +
             	'ORDER BY ' + sortOrder + ascOrDesc + 'NULLS LAST ' + 
             	'LIMIT :listSize OFFSET :counter';
-
-        system.debug(query);
-        system.debug(searchDuration);
         
         // Returning main query results
         List<Appointment__c> results = Database.query(query);
@@ -126,6 +124,7 @@ public class AppointmentsController {
              * tried making fields' labels visible, but without its' values (failed :( )
              * if null, then it this section isn't displayed at all
              */ 
+            this.workingHours = '';
             return null;
         } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is 
             this.workingHours = 'WHERE Doctor__c.Name = ' + '\'' + selectedDocName + '\'';
