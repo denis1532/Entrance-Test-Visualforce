@@ -19,26 +19,30 @@ public class AppointmentsController {
     public String selectedDocName {get;set;}
     public String selectedPatientName {get;set;}
     
-    /*** Tried to realize Appointment Date and Duration In Minutes fields in different ways, no result ***/
+    /*** Tried to realize Appointment Date field in different ways, no result ***/
     
-    /* // Date search
+    // Date search
     public Datetime dat {get;set;}
     public Date dateName {get;set;}
     public String dateNameQuery;
-    public Appointment__c dateNameApp {get;set;}*/
+    public Appointment__c dateNameApp {get;set;}
+    
+    public Date searchDate {get;set;}
+    
+    public String dateQuery;
+    
+    /*** ---------- ***/
     
     // Duration search
     public Integer searchDuration {get;set;}
     public String durationQuery;
-    
-    /*** ***/
     
     // Pagination
     private Integer counter = 0;
     private Integer listSize = 10;
     public Integer totalSize {get;set;}
     
-    /*** ---------- Main ---------- ***/
+    /*** ---------- Init ---------- ***/
     
     public AppointmentsController() {
         // Initialization properties
@@ -91,18 +95,42 @@ public class AppointmentsController {
                 ') ';
         }
         
+        system.debug(selectedDocName);
+        
         if (searchDuration == 0 || searchDuration == null) {
             this.durationQuery = '';
             this.searchDuration = null;
         } else {
-            this.durationQuery = (selectedDocName == null && selectedPatientName == null ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') ' : 'AND (Duration_in_minutes__c = ' + searchDuration + ') ');
+            this.durationQuery = (selectedDocName == null && selectedPatientName == null 
+                                  ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') ' 
+                                  : 'AND (Duration_in_minutes__c = ' + searchDuration + ') '
+                                 );
+        }
+        
+        if (searchDate == null) {
+            this.dateQuery = '';
+            this.searchDate = null;
+        } else {
+            //Datetime.newInstance(searchDate);
+            
+            Datetime lowerComparisonDate = searchDate;
+            Datetime upperComparisonDate = searchDate.addDays(1);
+            
+            String formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
+            String formattedUpper = upperComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
+            
+            this.dateQuery = (selectedDocName == null && selectedPatientName == null 
+                              ? 'WHERE (Appointment_Date__c < ' + formattedUpper + ' AND Appointment_Date__c >= ' + formattedLower + ') ' 
+                              : 'AND (Appointment_Date__c < ' + formattedUpper + 'AND Appointment_Date__c >= ' + formattedLower + ') '
+                             );
         }
         
         // Customizing main query 
         query = 'SELECT Id, Doctor__r.Name, Doctor__r.Working_Hours_Start__c, Doctor__r.Working_Hours_End__c, Patient__r.Name, Appointment_Date__c, Duration_in_minutes__c  ' +
             	'FROM Appointment__c ' + 
             	doctorsQuery + 
-            	durationQuery +
+            	dateQuery + 
+            	durationQuery + 
             	'ORDER BY ' + sortOrder + ascOrDesc + 'NULLS LAST ' + 
             	'LIMIT :listSize OFFSET :counter';
         
@@ -151,16 +179,29 @@ public class AppointmentsController {
 
 	/*** ---------- ***/
     
-    /*** ---------- Duration field search buttons ---------- ***/
+    /*** ---------- Clear fields buttons ---------- ***/
     
-    public PageReference searchApp() {
+    public PageReference resetSearchDoc() {
         counter = 0;
+        this.selectedDocName = null;
         return null;
     }
     
-    public PageReference resetSearch() {
+    public PageReference resetSearchPatient() {
+        counter = 0;
+        this.selectedPatientName = null;
+        return null;
+    }
+    
+    public PageReference resetSearchAppointmentByDuration() {
         counter = 0;
         this.searchDuration = null;
+        return null;
+    }
+    
+    public PageReference resetSearchAppointmentByDate() {
+        counter = 0;
+        this.searchDate = null;
         return null;
     }
     

@@ -9,7 +9,6 @@
     
     <apex:form >
     	<apex:pageBlock id="appointments_list" title="Appointments table" >
-            
             <!-- Pagination buttons -->
             <apex:pageBlockButtons location="bottom" styleClass="paginationBlock" >
                 <apex:outputPanel id="navigation" >
@@ -22,11 +21,13 @@
             </apex:pageBlockButtons>
             
             <!-- Doctors' picklist -->
-            <apex:pageBlockSection columns="1" >
+            <apex:pageBlockSection columns="2" >
             	<apex:selectList id="option" value="{! selectedDocName }" label="Select a doctor" size="1" multiselect="false">
                     <apex:selectOptions value="{! selectedDoc }" />
                     <apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:selectList>
+                
+                <apex:commandButton action="{! resetSearchDoc }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
             </apex:pageBlockSection>
             
             <!-- Add New Doctor button -->
@@ -44,11 +45,13 @@
             </apex:pageBlockSection>
             
             <!-- Patients' picklist -->
-            <apex:pageBlockSection columns="1" >
+            <apex:pageBlockSection columns="2" >
             	<apex:selectList id="option" value="{! selectedPatientName }" label="Select a patient" size="1" multiselect="false">
                     <apex:selectOptions value="{! selectedPatient }" />
                     <apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:selectList>
+                
+                <apex:commandButton action="{! resetSearchPatient }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
             </apex:pageBlockSection>
             
             <!-- Add New Patient button -->
@@ -56,20 +59,25 @@
             	<apex:commandButton action="{! URLFOR($Action.Patient__c.New) }" reRender="appointments_table" value="Add New Patient" />
             </apex:pageBlockSection>
             
-            <!-- Date section
-            <apex:pageBlockSection columns="1">
-            	<apex:input type="datetime" value="{! dat }" label="Appointment Date 1" ></apex:input>
-                <apex:inputText value="{! dateName }" label="Appointment Date 2" size="10" id="demo" onfocus="DatePicker.pickDate(false, this, false);" />
-                <apex:inputField value="{! dateNameApp.Appointment_Date__c }" label="Appointment Date 3" showDatePicker="true" required="false" />
-            </apex:pageBlockSection> -->
+            <!-- Date section -->
+            <apex:pageBlockSection columns="2">
+                <apex:input type="date" value="{! searchDate }" label="Appointment Date" >
+                	<apex:actionSupport event="onchange" reRender="appointments_table, appointments_list" />
+                </apex:input>
+                
+                <apex:panelGroup >
+                	<apex:commandButton action="{! resetSearchAppointmentByDate }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
+                </apex:panelGroup>
+            </apex:pageBlockSection>
             
             <!-- Duration section -->
             <apex:pageBlockSection columns="2" >
-                <apex:input html-min="0" type="number" value="{! searchDuration }" label="Duration in minutes" ></apex:input>
+                <apex:input html-min="0" type="number" value="{! searchDuration }" label="Duration in minutes" >
+                	<apex:actionSupport event="onchange" reRender="appointments_table, appointments_list" />
+                </apex:input>
                 
                 <apex:panelGroup >
-                    <apex:commandButton action="{! searchApp }" reRender="appointments_table, appointments_list" status="status" title="Search" value="Search" />
-                    <apex:commandButton action="{! resetSearch }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
+                    <apex:commandButton action="{! resetSearchAppointmentByDuration }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
                 </apex:panelGroup>
             </apex:pageBlockSection>
             
