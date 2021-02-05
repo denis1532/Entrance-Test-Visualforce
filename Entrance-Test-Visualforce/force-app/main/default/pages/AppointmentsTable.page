@@ -6,6 +6,7 @@
         /* Because of this the table's title disappears as well as the empty title of pageBlockButtons does */
         /* But without this, pageBlockButtons has an empty title that moves buttons a little bit to the right side */
         
+        /* Remove increment and decrement arrows on duration field */
         input::-webkit-outer-spin-button {
             -webkit-appearance: none;
             -moz-appearance: none;
