@@ -6,6 +6,8 @@ public class AppointmentsController {
     // Additions to queries   
     public String doctorsQuery;
     public String workingHours;
+    public String dateQuery;
+    public String durationQuery;
     
     // Total records query
     public String totalRecordsNumber;
@@ -16,30 +18,23 @@ public class AppointmentsController {
     private String ascOrDesc;
     
     // Picklist options
-    public String selectedDocName {get;set;}
+    public String selectedDoctorName {get;set;}
     public String selectedPatientName {get;set;}
     
-    /*** Tried to realize Appointment Date field in different ways, no result ***/
-    
     // Date search
-    public Datetime dat {get;set;}
-    public Date dateName {get;set;}
-    public String dateNameQuery;
-    public Appointment__c dateNameApp {get;set;}
-    
     public Date searchDate {get;set;}
-    
-    public String dateQuery;
-    
-    /*** ---------- ***/
+    // Comparison for date query
+    Datetime lowerComparisonDate;
+    Datetime upperComparisonDate;
+    String formattedLower;
+    String formattedUpper;
     
     // Duration search
     public Integer searchDuration {get;set;}
-    public String durationQuery;
     
     // Pagination
-    private Integer counter = 0;
-    private Integer listSize = 10;
+    private Integer counter;
+    private Integer listSize;
     public Integer totalSize {get;set;}
     
     /*** ---------- Init ---------- ***/
@@ -51,6 +46,8 @@ public class AppointmentsController {
         this.doctorsQuery = '';
         this.durationQuery = '';
         this.searchDuration = null;
+        this.counter = 0;
+        this.listSize = 10;
     }
     
     /*** ---------- ***/
@@ -58,7 +55,7 @@ public class AppointmentsController {
     /*** ---------- Picklists ---------- ***/
     
     // Adding options to DOCTOR picklist
-    public List<SelectOption> getSelectedDoc() {
+    public List<SelectOption> getSelectedDoctor() {
         List<SelectOption> doctors = new List<SelectOption>();
         doctors.add(new SelectOption('','-All-'));
         for (Doctor__c doctor : [SELECT Id, Name FROM Doctor__c ORDER BY Name ASC]) {
@@ -84,44 +81,43 @@ public class AppointmentsController {
     // Table results
     public List<Appointment__c> getApps() {
         // Getting DOCTOR and PATIENT picklist value
-        if (selectedDocName == null && selectedPatientName == null) {
+        if (selectedDoctorName == null && selectedPatientName == null) {
             this.doctorsQuery = '';
             this.durationQuery = '';
         } else {
             this.doctorsQuery = 'WHERE (' + 
-                (selectedDocName != null ? 'Doctor__r.Name = ' + '\'' + selectedDocName + '\'' : '') + 
-                (selectedDocName != null && selectedPatientName != null ? ' AND ' : '') + 
+                (selectedDoctorName != null ? 'Doctor__r.Name = ' + '\'' + selectedDoctorName + '\'' : '') + 
+                (selectedDoctorName != null && selectedPatientName != null ? ' AND ' : '') + 
         		(selectedPatientName != null ? 'Patient__r.Name = ' + '\'' + selectedPatientName + '\'' : '') + 
                 ') ';
         }
         
-        system.debug(selectedDocName);
-        
+        // Setting duration query
         if (searchDuration == 0 || searchDuration == null) {
             this.durationQuery = '';
             this.searchDuration = null;
         } else {
-            this.durationQuery = (selectedDocName == null && selectedPatientName == null 
+            this.durationQuery = (selectedDoctorName == null && selectedPatientName == null && searchDate == null
                                   ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') ' 
                                   : 'AND (Duration_in_minutes__c = ' + searchDuration + ') '
                                  );
         }
         
+        // Setting date query
         if (searchDate == null) {
             this.dateQuery = '';
             this.searchDate = null;
         } else {
-            //Datetime.newInstance(searchDate);
+            lowerComparisonDate = searchDate;
+            upperComparisonDate = searchDate.addDays(1);
             
-            Datetime lowerComparisonDate = searchDate;
-            Datetime upperComparisonDate = searchDate.addDays(1);
+            // Formatting to ISO date value to enable comparison in query
+            formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
+            formattedUpper = upperComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
             
-            String formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
-            String formattedUpper = upperComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
-            
-            this.dateQuery = (selectedDocName == null && selectedPatientName == null 
-                              ? 'WHERE (Appointment_Date__c < ' + formattedUpper + ' AND Appointment_Date__c >= ' + formattedLower + ') ' 
-                              : 'AND (Appointment_Date__c < ' + formattedUpper + 'AND Appointment_Date__c >= ' + formattedLower + ') '
+            this.dateQuery = (selectedDoctorName == null && selectedPatientName == null 
+                              ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') ' 
+                              : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                              );
         }
         
@@ -134,11 +130,10 @@ public class AppointmentsController {
             	'ORDER BY ' + sortOrder + ascOrDesc + 'NULLS LAST ' + 
             	'LIMIT :listSize OFFSET :counter';
         
-        // Returning main query results
         List<Appointment__c> results = Database.query(query);
         
         // Pagination total pages variable
-        totalRecordsNumber = 'SELECT Count() ' + 'FROM Appointment__c ' + doctorsQuery + durationQuery;
+        totalRecordsNumber = 'SELECT Count() ' + 'FROM Appointment__c ' + doctorsQuery + dateQuery + durationQuery;
         this.totalSize = Database.countQuery(totalRecordsNumber);
 
         return results;
@@ -146,7 +141,7 @@ public class AppointmentsController {
     
     // Working hours section results
     public List<Doctor__c> getHours() {
-        if (selectedDocName == null) {
+        if (selectedDoctorName == null) {
             /* List<Doctor__c> hours = new List<Doctor__c>();
              * 
              * tried making fields' labels visible, but without its' values (failed :( )
@@ -155,7 +150,7 @@ public class AppointmentsController {
             this.workingHours = '';
             return null;
         } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is 
-            this.workingHours = 'WHERE Doctor__c.Name = ' + '\'' + selectedDocName + '\'';
+            this.workingHours = 'WHERE Doctor__c.Name = ' + '\'' + selectedDoctorName + '\'';
         }
         
         // Customizing hours query
@@ -181,29 +176,35 @@ public class AppointmentsController {
     
     /*** ---------- Clear fields buttons ---------- ***/
     
-    public PageReference resetSearchDoc() {
+    // Reset doctor's picklist
+    public PageReference resetSearchDoctor() {
         counter = 0;
-        this.selectedDocName = null;
+        this.selectedDoctorName = null;
         return null;
     }
     
+    // Reset patient's picklist
     public PageReference resetSearchPatient() {
         counter = 0;
         this.selectedPatientName = null;
         return null;
     }
     
+    // Reset date field
+    public PageReference resetSearchAppointmentByDate() {
+        counter = 0;
+        this.searchDate = null;
+        return null;
+    }
+    
+    // Reset duration field
     public PageReference resetSearchAppointmentByDuration() {
         counter = 0;
         this.searchDuration = null;
         return null;
     }
     
-    public PageReference resetSearchAppointmentByDate() {
-        counter = 0;
-        this.searchDate = null;
-        return null;
-    }
+
     
     /*** ---------- ***/
     

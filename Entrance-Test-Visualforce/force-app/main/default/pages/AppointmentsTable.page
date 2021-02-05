@@ -5,6 +5,20 @@
         
         /* Because of this the table's title disappears as well as the empty title of pageBlockButtons does */
         /* But without this, pageBlockButtons has an empty title that moves buttons a little bit to the right side */
+        
+        input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            margin: 0; 
+        }
+        
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            margin: 0; 
+        }
     </style>
     
     <apex:form >
@@ -12,28 +26,28 @@
             <!-- Pagination buttons -->
             <apex:pageBlockButtons location="bottom" styleClass="paginationBlock" >
                 <apex:outputPanel id="navigation" >
-                    <apex:commandButton action="{! Beginning }" title="First Page" value="<<" disabled="{! disableBeginningPrevious }" reRender="appointments_table, navigation"/>
-                    <apex:commandButton action="{! Previous }" title="Previous Page" value="<" disabled="{! disableBeginningPrevious }" reRender="appointments_table, navigation"/>        
+                    <apex:commandButton action="{! Beginning }" title="First Page" value="<<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation"/>
+                    <apex:commandButton action="{! Previous }" title="Previous Page" value="<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation"/>        
                     	<apex:outputText >Page # {! pageNumber } of {! totalPages }</apex:outputText>
-                    <apex:commandButton action="{! Next }" title="Next Page" value=">" disabled="{! disableNextEnd }" reRender="appointments_table, navigation"/>
-                    <apex:commandButton action="{! End }" title="Last Page" value=">>" disabled="{! disableNextEnd }" reRender="appointments_table, navigation"/>        
+                    <apex:commandButton action="{! Next }" title="Next Page" value=">" disabled="{! disableNextEnd }" reRender="appointments_list, navigation"/>
+                    <apex:commandButton action="{! End }" title="Last Page" value=">>" disabled="{! disableNextEnd }" reRender="appointments_list, navigation"/>        
                 </apex:outputPanel>
             </apex:pageBlockButtons>
             
             <!-- Doctors' picklist -->
             <apex:pageBlockSection columns="2" >
-            	<apex:selectList id="option" value="{! selectedDocName }" label="Select a doctor" size="1" multiselect="false">
-                    <apex:selectOptions value="{! selectedDoc }" />
+            	<apex:selectList id="option" value="{! selectedDoctorName }" label="Select a doctor" size="1" multiselect="false">
+                    <apex:selectOptions value="{! selectedDoctor }" />
                     <apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:selectList>
                 
-                <apex:commandButton action="{! resetSearchDoc }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
+                <apex:commandButton action="{! resetSearchDoctor }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
             </apex:pageBlockSection>
             
             <!-- Add New Doctor button -->
             <apex:pageBlockSection columns="1" >
-            	<apex:commandButton action="{! URLFOR($Action.Doctor__c.New) }" reRender="appointments_table" value="Add New Doctor" />
-            	<apex:actionSupport event="onchange" reRender="appointments_table" />
+            	<apex:commandButton action="{! URLFOR($Action.Doctor__c.New) }" reRender="appointments_list" value="Add New Doctor" />
+            	<apex:actionSupport event="onchange" reRender="appointments_list" />
             </apex:pageBlockSection>
             
             <!-- Working Hours section -->
@@ -51,86 +65,84 @@
                     <apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:selectList>
                 
-                <apex:commandButton action="{! resetSearchPatient }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
+                <apex:commandButton action="{! resetSearchPatient }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
             </apex:pageBlockSection>
             
             <!-- Add New Patient button -->
             <apex:pageBlockSection columns="1" >
-            	<apex:commandButton action="{! URLFOR($Action.Patient__c.New) }" reRender="appointments_table" value="Add New Patient" />
+            	<apex:commandButton action="{! URLFOR($Action.Patient__c.New) }" reRender="appointments_list" value="Add New Patient" />
             </apex:pageBlockSection>
             
             <!-- Date section -->
             <apex:pageBlockSection columns="2">
                 <apex:input type="date" value="{! searchDate }" label="Appointment Date" >
-                	<apex:actionSupport event="onchange" reRender="appointments_table, appointments_list" />
+                	<apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:input>
                 
                 <apex:panelGroup >
-                	<apex:commandButton action="{! resetSearchAppointmentByDate }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
+                	<apex:commandButton action="{! resetSearchAppointmentByDate }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
                 </apex:panelGroup>
             </apex:pageBlockSection>
             
             <!-- Duration section -->
             <apex:pageBlockSection columns="2" >
-                <apex:input html-min="0" type="number" value="{! searchDuration }" label="Duration in minutes" >
-                	<apex:actionSupport event="onchange" reRender="appointments_table, appointments_list" />
+                <apex:input html-min="0" html-placeholder="Type duration in minutes" type="number" value="{! searchDuration }" label="Duration in minutes" >
+                	<apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:input>
                 
                 <apex:panelGroup >
-                    <apex:commandButton action="{! resetSearchAppointmentByDuration }" reRender="appointments_table, appointments_list" status="status" title="Clear" value="Clear" />
+                    <apex:commandButton action="{! resetSearchAppointmentByDuration }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
                 </apex:panelGroup>
             </apex:pageBlockSection>
             
             <!-- Add New Appointment button -->
             <apex:pageBlockSection columns="1" >
-            	<apex:commandButton action="{! URLFOR($Action.Appointment__c.New) }" reRender="appointments_table" value="Add New Appointment" />
+            	<apex:commandButton action="{! URLFOR($Action.Appointment__c.New) }" reRender="appointments_list" value="Add New Appointment" />
             </apex:pageBlockSection>
             
             <!-- Table -->
-            <apex:outputPanel id="appointments_table">
-                <apex:pageBlockTable value="{! apps }" var="app" columnsWidth="12%, 22%, 22%, 22%, 22%" > 
-                    <!-- Action column -->
-                    <apex:column headerValue="Action">
-                        <apex:outputLink value="/{!app.Id}">View</apex:outputLink>
-                    </apex:column>
-                    
-                    <!-- Doctor's Name column -->
-                    <apex:column value="{! app.Doctor__r.Name }">
-                        <apex:facet name="header">
-                            <apex:commandLink action="{! sortByField }" reRender="appointments_table" value="Doctor's Name">
-                                <apex:param value="Doctor__r.Name" assignTo="{! sortOrder }"></apex:param>
-                            </apex:commandLink>
-                        </apex:facet>
-                    </apex:column>
-                    
-                    <!-- Patient's Name column -->
-                    <apex:column value="{! app.Patient__r.Name }">
-                        <apex:facet name="header">
-                            <apex:commandLink action="{! sortByField }" reRender="appointments_table" value="Patient's Name">
-                                <apex:param value="Patient__r.Name" assignTo="{! sortOrder }"></apex:param>
-                            </apex:commandLink>
-                        </apex:facet>
-                    </apex:column>
-                    
-                    <!-- Date column -->
-                    <apex:column value="{! app.Appointment_Date__c }">
-                        <apex:facet name="header">
-                            <apex:commandLink action="{! sortByField }" reRender="appointments_table" value="Date">
-                                <apex:param value="Appointment_Date__c" assignTo="{! sortOrder }"></apex:param>
-                            </apex:commandLink>
-                        </apex:facet>
-                    </apex:column>
-                    
-                    <!-- Duration column -->
-                    <apex:column value="{! app.Duration_in_minutes__c } minutes">
-                        <apex:facet name="header">
-                            <apex:commandLink action="{! sortByField }" reRender="appointments_table" value="Duration">
-                                <apex:param value="Duration_in_minutes__c" assignTo="{! sortOrder }"></apex:param>
-                            </apex:commandLink>
-                        </apex:facet>
-                    </apex:column>
-                </apex:pageBlockTable>
-            </apex:outputPanel>
+            <apex:pageBlockTable value="{! apps }" var="app" columnsWidth="12%, 22%, 22%, 22%, 22%" > 
+                <!-- Action column -->
+                <apex:column headerValue="Action">
+                    <apex:outputLink value="/{!app.Id}">View</apex:outputLink>
+                </apex:column>
+                
+                <!-- Doctor's Name column -->
+                <apex:column value="{! app.Doctor__r.Name }">
+                    <apex:facet name="header">
+                        <apex:commandLink action="{! sortByField }" reRender="appointments_list" value="Doctor's Name">
+                            <apex:param value="Doctor__r.Name" assignTo="{! sortOrder }"></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                
+                <!-- Patient's Name column -->
+                <apex:column value="{! app.Patient__r.Name }">
+                    <apex:facet name="header">
+                        <apex:commandLink action="{! sortByField }" reRender="appointments_list" value="Patient's Name">
+                            <apex:param value="Patient__r.Name" assignTo="{! sortOrder }"></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                
+                <!-- Date column -->
+                <apex:column value="{! app.Appointment_Date__c }">
+                    <apex:facet name="header">
+                        <apex:commandLink action="{! sortByField }" reRender="appointments_list" value="Date">
+                            <apex:param value="Appointment_Date__c" assignTo="{! sortOrder }"></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+                
+                <!-- Duration column -->
+                <apex:column value="{! app.Duration_in_minutes__c } minutes">
+                    <apex:facet name="header">
+                        <apex:commandLink action="{! sortByField }" reRender="appointments_list" value="Duration">
+                            <apex:param value="Duration_in_minutes__c" assignTo="{! sortOrder }"></apex:param>
+                        </apex:commandLink>
+                    </apex:facet>
+                </apex:column>
+            </apex:pageBlockTable>
         </apex:pageBlock>
     </apex:form>
 </apex:page>
