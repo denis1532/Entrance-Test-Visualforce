@@ -87,7 +87,7 @@
             
             <!-- Duration section -->
             <apex:pageBlockSection columns="2" >
-                <apex:input html-min="0" html-placeholder="Type duration in minutes" type="number" value="{! searchDuration }" label="Duration in minutes" >
+                <apex:input html-min="0" html-placeholder="Type amount of minutes" type="number" value="{! searchDuration }" label="Duration in minutes" >
                 	<apex:actionSupport event="onchange" reRender="appointments_list" />
                 </apex:input>
                 

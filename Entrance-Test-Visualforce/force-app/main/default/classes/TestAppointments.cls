@@ -1,92 +1,171 @@
 @isTest
 private class TestAppointments {
-	
-    static testmethod void testAppointmentsController() {
+    
+    static testmethod void testTriggerCreation() {
         
-        AppointmentsController appntCont = new AppointmentsController();
-        
-        /*** ***/
-        List<Appointment__c> apnt = appntCont.getApps();
-        appntCont.sortOrder = 'Name';
-        appntCont.sortByField();
-        appntCont.sortOrder = 'Doctor__r.Name';
-        appntCont.sortByField();
-        
-        // New doctor
-        Datetime curDateTime = Datetime.now();
-        Time curTime = curDateTime.time();
-        Time futureTime = curTime.addMinutes(50);
+        /*** ---------- New doctor ---------- ***/
+        // Setting doctor's working hours
+        Time newWorkingHoursStart = Time.newInstance(09, 00, 00, 000);
+        Time newWorkingHoursEnd = Time.newInstance(12, 00, 00, 000);
         
         Doctor__c NewDoctor = new Doctor__c();
-        NewDoctor.Name = 'Test';
-        NewDoctor.Working_Hours_Start__c = curTime;
-        NewDoctor.Working_Hours_End__c = futureTime;
+        NewDoctor.Name = 'Test Doctor';
+        NewDoctor.Working_Hours_Start__c = newWorkingHoursStart;
+        NewDoctor.Working_Hours_End__c = newWorkingHoursEnd;
         Insert NewDoctor;
-        system.debug(NewDoctor);
+        System.AssertEquals(1, [SELECT Id FROM Doctor__c].size());
         
-        // New patient
+        /*** ---------- New patient ---------- ***/
         Patient__c NewPatient = new Patient__c();
-        NewPatient.Name = 'Test';
+        NewPatient.Name = 'Test Patient';
         Insert NewPatient;
-        system.debug(NewPatient);
+        System.AssertEquals(1, [SELECT Id FROM Patient__c].size());
         
-        // Doctor picklist
-        List<SelectOption> selOptsDoctor = appntCont.getSelectedDoc();
+        /*** ---------- New appointment1 with correct time for doctor ---------- ***/
+        // Setting new appointment datetime
+        Datetime newCorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 10, 00, 00);
         
-        // Patient picklist
-        List<SelectOption> selOptsPatient = appntCont.getSelectedPatient();
+        Appointment__c NewAppointmentCorrect1 = new Appointment__c();
+        NewAppointmentCorrect1.Name = 'Test Appointment With Correct Time';
+        NewAppointmentCorrect1.Appointment_Date__c = newCorrectDatetime1;
+        NewAppointmentCorrect1.Duration_in_minutes__c = 15;
+        NewAppointmentCorrect1.Doctor__c = NewDoctor.Id;
+        NewAppointmentCorrect1.Patient__c = NewPatient.Id;
+        insert NewAppointmentCorrect1;
+        System.AssertEquals(1, [SELECT Id FROM Appointment__c].size());
         
-        // Working hours values
-        List<Doctor__c> hoursList = appntCont.getHours();
+        /*** ---------- New appointment2 with correct time for doctor ---------- ***/
+        // Setting new appointment datetime
+        Datetime newCorrectDatetime2 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
         
-        /*** PAGINATION ***/
+        Appointment__c NewAppointmentCorrect2 = new Appointment__c();
+        NewAppointmentCorrect2.Name = 'Test Appointment With Correct Time';
+        NewAppointmentCorrect2.Appointment_Date__c = newCorrectDatetime2;
+        NewAppointmentCorrect2.Duration_in_minutes__c = 30;
+        NewAppointmentCorrect2.Doctor__c = NewDoctor.Id;
+        NewAppointmentCorrect2.Patient__c = NewPatient.Id;
+        insert NewAppointmentCorrect2;
+        System.AssertEquals(2, [SELECT Id FROM Appointment__c].size());
         
-        List<Doctor__c> doctorsListPagination = [SELECT Id FROM Doctor__c];
-        List<Patient__c> patientsListPagination = [SELECT Id FROM Patient__c];
+        /*** ---------- New appointment with incorrect time for already existing appointment ---------- ***/
+        // Setting new appointment datetime
+        Datetime newIncorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
         
-        // Test pagination
-        List<Appointment__c> appntList = new List<Appointment__c>();
-        Datetime testAppntDate = Datetime.now();
-        
-        for (Integer i = 0; i < 15; i++) {
-            appntList.add(new Appointment__c(Name = 'Test ' + i,
-                                             Appointment_Date__c = testAppntDate.addMinutes(i),
-                                             Duration_in_minutes__c = i,
-                                             Doctor__c = doctorsListPagination[0].Id,
-                                             Patient__c = patientsListPagination[0].Id
-                                             ));
+        Appointment__c NewAppointmentIncorrect1 = new Appointment__c();
+        NewAppointmentIncorrect1.Name = 'Test Appointment With Correct Time';
+        NewAppointmentIncorrect1.Appointment_Date__c = newIncorrectDatetime1;
+        NewAppointmentIncorrect1.Duration_in_minutes__c = 10;
+        NewAppointmentIncorrect1.Doctor__c = NewDoctor.Id;
+        NewAppointmentIncorrect1.Patient__c = NewPatient.Id;
+        try {
+            insert NewAppointmentIncorrect1;
         }
-        insert appntList;
+        catch (Exception e) {
+            Boolean expectedExceptionThrown = e.getMessage().contains('My Error Message') ? true : false;
+            System.AssertEquals(expectedExceptionThrown, false);
+        }
+        System.AssertEquals(2, [SELECT Id FROM Appointment__c].size());
+    }
+    
+    static testmethod void testTriggerCreationWorkingHours() {
         
-        // Test getTotalPages
-        appntCont.getApps();
-        System.assertEquals(2, appntCont.getTotalPages());
+        /*** ---------- New doctor ---------- ***/        
+        // Setting doctor's working hours
+        Time newWorkingHoursStart = Time.newInstance(09, 00, 00, 000);
+        Time newWorkingHoursEnd = Time.newInstance(12, 00, 00, 000);
         
-        // Test getPageNumber method
-        System.assertEquals(1, appntCont.getPageNumber());
+        Doctor__c NewDoctor = new Doctor__c();
+        NewDoctor.Name = 'Test Doctor';
+        NewDoctor.Working_Hours_Start__c = newWorkingHoursStart;
+        NewDoctor.Working_Hours_End__c = newWorkingHoursEnd;
+        Insert NewDoctor;
+        System.AssertEquals(1, [SELECT Id FROM Doctor__c].size());
         
-        // Test Next method
-        appntCont.Next();
-        System.assertEquals(2, appntCont.getPageNumber());
-
-        // Test Previous method
-        appntCont.Previous();
-        System.assertEquals(1, appntCont.getPageNumber());
+        /*** ---------- New patient ---------- ***/
+        Patient__c NewPatient = new Patient__c();
+        NewPatient.Name = 'Test Patient';
+        Insert NewPatient;
+        System.AssertEquals(1, [SELECT Id FROM Doctor__c].size());
         
-        // Test End method
-        appntCont.End();
-        System.assertEquals(2, appntCont.getPageNumber());
+        /*** ---------- New appointment1 with correct time for doctor ---------- ***/
+        Datetime newCorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 10, 00, 00);
         
-        // Test getDisableNextEnd method
-        System.assertEquals(true, appntCont.getDisableNextEnd());
+        Appointment__c NewAppointmentCorrect1 = new Appointment__c();
+        NewAppointmentCorrect1.Name = 'Test Appointment With Correct Time';
+        NewAppointmentCorrect1.Appointment_Date__c = newCorrectDatetime1;
+        NewAppointmentCorrect1.Duration_in_minutes__c = 15;
+        NewAppointmentCorrect1.Doctor__c = NewDoctor.Id;
+        NewAppointmentCorrect1.Patient__c = NewPatient.Id;
+        insert NewAppointmentCorrect1;
+        System.AssertEquals(1, [SELECT Id FROM Appointment__c].size());
         
-        // Test Beginning method
-        appntCont.Beginning();
-        System.assertEquals(1, appntCont.getPageNumber());
-                
-        // Test getDisableBeginningPrevious method
-        System.assertEquals(true, appntCont.getDisableBeginningPrevious()); 
-   
+        /*** ---------- New appointment2 with correct time for doctor ---------- ***/
+        Datetime newCorrectDatetime2 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
+        
+        Appointment__c NewAppointmentCorrect2 = new Appointment__c();
+        NewAppointmentCorrect2.Name = 'Test Appointment With Correct Time';
+        NewAppointmentCorrect2.Appointment_Date__c = newCorrectDatetime2;
+        NewAppointmentCorrect2.Duration_in_minutes__c = 30;
+        NewAppointmentCorrect2.Doctor__c = NewDoctor.Id;
+        NewAppointmentCorrect2.Patient__c = NewPatient.Id;
+        insert NewAppointmentCorrect2;
+        System.AssertEquals(2, [SELECT Id FROM Appointment__c].size());
+        
+        /*** ---------- New appointment with incorrect time for doctor's working hours ---------- ***/
+        Datetime newIncorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 14, 00, 00);
+        
+        Appointment__c NewAppointmentIncorrect1 = new Appointment__c();
+        NewAppointmentIncorrect1.Name = 'Test Appointment With Correct Time';
+        NewAppointmentIncorrect1.Appointment_Date__c = newIncorrectDatetime1;
+        NewAppointmentIncorrect1.Duration_in_minutes__c = 10;
+        NewAppointmentIncorrect1.Doctor__c = NewDoctor.Id;
+        NewAppointmentIncorrect1.Patient__c = NewPatient.Id;
+        try {
+            insert NewAppointmentIncorrect1;
+        }
+        catch (Exception e) {
+            Boolean expectedExceptionThrown = e.getMessage().contains('My Error Message') ? true : false;
+            System.AssertEquals(expectedExceptionThrown, false);
+        }
+        System.AssertEquals(2, [SELECT Id FROM Appointment__c].size());
+    }
+    	
+    static testmethod void testAppointmentsController() {
+        
+        /*** ---------- Test custom controller ---------- ***/
+        AppointmentsController AppointmentsController = new AppointmentsController();
+        
+        /*** ---------- Test doctors select options ---------- ***/
+        
+        /*** New doctor ***/
+        // Setting doctor's working hours
+        Time newWorkingHoursStart = Time.newInstance(09, 00, 00, 000);
+        Time newWorkingHoursEnd = Time.newInstance(12, 00, 00, 000);
+        
+        Doctor__c NewDoctor = new Doctor__c();
+        NewDoctor.Name = 'Test Doctor';
+        NewDoctor.Working_Hours_Start__c = newWorkingHoursStart;
+        NewDoctor.Working_Hours_End__c = newWorkingHoursEnd;
+        Insert NewDoctor;
+        System.AssertEquals(1, [SELECT Id FROM Doctor__c].size());
+        /*** ***/
+        
+        List<SelectOption> selectedDoctorOptions = AppointmentsController.getSelectedDoctor();
+        System.AssertEquals(selectedDoctorOptions.get(0).getLabel(), '-All-');
+        System.AssertEquals(selectedDoctorOptions.get(1).getLabel(), 'Test Doctor');
+        
+        /*** ---------- Test patients select options ---------- ***/
+        
+        /*** New patient ***/
+        Patient__c NewPatient = new Patient__c();
+        NewPatient.Name = 'Test Patient';
+        Insert NewPatient;
+        System.AssertEquals(1, [SELECT Id FROM Patient__c].size());
+        /*** ***/
+        
+        List<SelectOption> selectedPatientOptions = AppointmentsController.getSelectedPatient();
+        System.AssertEquals(selectedPatientOptions.get(0).getLabel(), '-All-');
+        System.AssertEquals(selectedDoctorOptions.get(0).getLabel(), 'Test Patient');
     }
     
 }

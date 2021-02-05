@@ -4,7 +4,7 @@ public class AppointmentsController {
     public String workingHoursQuery;
     
     // Additions to queries   
-    public String doctorsQuery;
+    public String doctorsAndPatientsQuery;
     public String workingHours;
     public String dateQuery;
     public String durationQuery;
@@ -37,20 +37,19 @@ public class AppointmentsController {
     private Integer listSize;
     public Integer totalSize {get;set;}
     
-    /*** ---------- Init ---------- ***/
-    
+    /*** ---------- Init ---------- ***/    
     public AppointmentsController() {
         // Initialization properties
         this.sortOrder = 'Doctor__r.Name';
         this.ascOrDesc = ' ASC ';
-        this.doctorsQuery = '';
+        this.doctorsAndPatientsQuery = '';
+        this.dateQuery = '';
+        this.searchDate = null;
         this.durationQuery = '';
         this.searchDuration = null;
         this.counter = 0;
         this.listSize = 10;
     }
-    
-    /*** ---------- ***/
     
     /*** ---------- Picklists ---------- ***/
     
@@ -61,6 +60,7 @@ public class AppointmentsController {
         for (Doctor__c doctor : [SELECT Id, Name FROM Doctor__c ORDER BY Name ASC]) {
             doctors.add(new SelectOption(doctor.Name, doctor.Name));
         }
+        
         return doctors;
     }
     
@@ -71,21 +71,19 @@ public class AppointmentsController {
         for (Patient__c patient : [SELECT Id, Name FROM Patient__c ORDER BY Name ASC]) {
             patients.add(new SelectOption(patient.Name, patient.Name));
         }
+        
         return patients;
     }
-	
-    /*** ---------- ***/
     
     /*** ---------- Main ---------- ***/
-    
-    // Table results
+    /*** Table results ***/
     public List<Appointment__c> getApps() {
         // Getting DOCTOR and PATIENT picklist value
         if (selectedDoctorName == null && selectedPatientName == null) {
-            this.doctorsQuery = '';
+            this.doctorsAndPatientsQuery = '';
             this.durationQuery = '';
         } else {
-            this.doctorsQuery = 'WHERE (' + 
+            this.doctorsAndPatientsQuery = 'WHERE (' + 
                 (selectedDoctorName != null ? 'Doctor__r.Name = ' + '\'' + selectedDoctorName + '\'' : '') + 
                 (selectedDoctorName != null && selectedPatientName != null ? ' AND ' : '') + 
         		(selectedPatientName != null ? 'Patient__r.Name = ' + '\'' + selectedPatientName + '\'' : '') + 
@@ -124,7 +122,7 @@ public class AppointmentsController {
         // Customizing main query 
         query = 'SELECT Id, Doctor__r.Name, Doctor__r.Working_Hours_Start__c, Doctor__r.Working_Hours_End__c, Patient__r.Name, Appointment_Date__c, Duration_in_minutes__c  ' +
             	'FROM Appointment__c ' + 
-            	doctorsQuery + 
+            	doctorsAndPatientsQuery + 
             	dateQuery + 
             	durationQuery + 
             	'ORDER BY ' + sortOrder + ascOrDesc + 'NULLS LAST ' + 
@@ -133,13 +131,13 @@ public class AppointmentsController {
         List<Appointment__c> results = Database.query(query);
         
         // Pagination total pages variable
-        totalRecordsNumber = 'SELECT Count() ' + 'FROM Appointment__c ' + doctorsQuery + dateQuery + durationQuery;
+        totalRecordsNumber = 'SELECT Count() ' + 'FROM Appointment__c ' + doctorsAndPatientsQuery + dateQuery + durationQuery;
         this.totalSize = Database.countQuery(totalRecordsNumber);
 
         return results;
     }
     
-    // Working hours section results
+    /***  Working hours section results ***/
     public List<Doctor__c> getHours() {
         if (selectedDoctorName == null) {
             /* List<Doctor__c> hours = new List<Doctor__c>();
@@ -163,7 +161,7 @@ public class AppointmentsController {
         return hours;
     }
     
-    // Field order
+    /*** Field order ***/
     public void sortByField() {
         if (ascOrDesc == ' ASC ') {
             ascOrDesc = ' DESC ';
@@ -171,8 +169,6 @@ public class AppointmentsController {
             ascOrDesc = ' ASC ';
         }
     }
-
-	/*** ---------- ***/
     
     /*** ---------- Clear fields buttons ---------- ***/
     
@@ -203,10 +199,6 @@ public class AppointmentsController {
         this.searchDuration = null;
         return null;
     }
-    
-
-    
-    /*** ---------- ***/
     
     /*** ---------- PAGINATION ---------- ***/
     
@@ -258,6 +250,4 @@ public class AppointmentsController {
          	return (totalSize/listSize);
       	}
    	}
-    
-    /*** ---------- ***/
 }
