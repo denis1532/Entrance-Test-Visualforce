@@ -42,6 +42,8 @@ public class AppointmentsController {
         // Initialization properties
         this.sortOrder = 'Doctor__r.Name';
         this.ascOrDesc = ' ASC ';
+        this.selectedDoctorName = null;
+        this.selectedPatientName = null;
         this.doctorsAndPatientsQuery = '';
         this.dateQuery = '';
         this.searchDate = null;
@@ -77,7 +79,7 @@ public class AppointmentsController {
     
     /*** ---------- Main ---------- ***/
     /*** Table results ***/
-    public List<Appointment__c> getApps() {
+    public List<Appointment__c> getAppointments() {
         // Getting DOCTOR and PATIENT picklist value
         if (selectedDoctorName == null && selectedPatientName == null) {
             this.doctorsAndPatientsQuery = '';
@@ -131,7 +133,11 @@ public class AppointmentsController {
         List<Appointment__c> results = Database.query(query);
         
         // Pagination total pages variable
-        totalRecordsNumber = 'SELECT Count() ' + 'FROM Appointment__c ' + doctorsAndPatientsQuery + dateQuery + durationQuery;
+        totalRecordsNumber = 'SELECT Count() ' + 
+            				 'FROM Appointment__c ' + 
+            				 doctorsAndPatientsQuery + 
+            				 dateQuery + 
+            				 durationQuery;
         this.totalSize = Database.countQuery(totalRecordsNumber);
 
         return results;
@@ -173,14 +179,14 @@ public class AppointmentsController {
     /*** ---------- Clear fields buttons ---------- ***/
     
     // Reset doctor's picklist
-    public PageReference resetSearchDoctor() {
+    public PageReference resetSearchAppointmentsByDoctor() {
         counter = 0;
         this.selectedDoctorName = null;
         return null;
     }
     
     // Reset patient's picklist
-    public PageReference resetSearchPatient() {
+    public PageReference resetSearchAppointmentsByPatient() {
         counter = 0;
         this.selectedPatientName = null;
         return null;

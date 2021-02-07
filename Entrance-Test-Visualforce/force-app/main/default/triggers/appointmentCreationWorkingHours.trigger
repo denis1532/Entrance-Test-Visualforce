@@ -14,7 +14,8 @@ trigger appointmentCreationWorkingHours on Appointment__c (before insert) {
         
         if (newAppointmentTime < workingHoursStart || 
             newAppointmentTime.addMinutes(newAppointmentDuration) > workingHoursEnd ) {
-            Trigger.new[0].addError('This doctor is not working on chosen time or your appointment time is more than doctor\'s workday end. Please, choose another time.');
+                Trigger.new[0].addError('This doctor is not working on chosen time or your appointment time is more than doctor\'s workday end. ' + 
+                                        'Please, choose another time.');
         }
 	}*/
     
@@ -35,7 +36,8 @@ trigger appointmentCreationWorkingHours on Appointment__c (before insert) {
             
             if (newAppointmentTime < workingHoursStart || 
                 newAppointmentTime.addMinutes(newAppointmentDuration) > workingHoursEnd ) {
-                    Trigger.new[0].addError('This doctor is not working on chosen time or your appointment time is more than doctor\'s workday end. Please, choose another time.');
+                    Trigger.new[0].addError('This doctor is not working on chosen time or your appointment time is more than doctor\'s workday end. ' + 
+                                            'Please, choose another time.');
                 }
         }
     }
