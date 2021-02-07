@@ -19,12 +19,12 @@ private class TestAppointments {
         return TestPatient;
     }
     
-    private static Appointment__c CreateTestAppointment(Integer num, Datetime dtime, Integer dur, Doctor__c doc, Patient__c patient) {
+    private static Appointment__c CreateTestAppointment(Integer num, Datetime dtime, Integer duration, Doctor__c doctor, Patient__c patient) {
         Appointment__c TestAppointment = new Appointment__c();
         TestAppointment.Name = 'Test Appointment ' + num;
         TestAppointment.Appointment_Date__c = dtime;
-        TestAppointment.Duration_in_minutes__c = dur;
-        TestAppointment.Doctor__c = doc.Id;
+        TestAppointment.Duration_in_minutes__c = duration;
+        TestAppointment.Doctor__c = doctor.Id;
         TestAppointment.Patient__c = patient.Id;
         
         return TestAppointment;
