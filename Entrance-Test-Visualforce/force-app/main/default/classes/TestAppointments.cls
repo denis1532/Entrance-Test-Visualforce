@@ -354,7 +354,7 @@ private class TestAppointments {
         /*** New Doctor for loop ***/
         // Setting doctor's working hours
         Time newWorkingHoursStartLoop = Time.newInstance(01, 00, 00, 000);
-        Time newWorkingHoursEndLoop = Time.newInstance(12, 00, 00, 000);
+        Time newWorkingHoursEndLoop = Time.newInstance(23, 00, 00, 000);
         
         Doctor__c NewDoctorForLoop = TestAppointments.CreateTestDoctor(3, newWorkingHoursStartLoop, newWorkingHoursEndLoop);
         insert NewDoctorForLoop;
@@ -365,7 +365,7 @@ private class TestAppointments {
         insert NewPatientForLoop;
         System.assertEquals(3, [SELECT Id FROM Patient__c].size());
         
-        // Create additional appointments to fullfi
+        // Create additional appointments to fulfill else method conditionals
         for (Integer i = 0; i < 5; i++) {
             Datetime newCorrectDatetimeLoop = Datetime.newInstance(2021, 02, 02, 01, 00+i*2, 00);
             Appointment__c TestAppointmentLoop = TestAppointments.CreateTestAppointment(i, newCorrectDatetimeLoop, 1, NewDoctorForLoop, NewPatientForLoop);
