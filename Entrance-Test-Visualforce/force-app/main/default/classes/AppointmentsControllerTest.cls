@@ -1,5 +1,5 @@
 @isTest
-private class TestAppointments {
+private class AppointmentsControllerTest {
     
     /*** ---------- Functions for doctor, patient and appointment creation ---------- ***/
     private static Doctor__c CreateTestDoctor(Integer num, Time workingHoursStart, Time workingHoursEnd) {
@@ -32,112 +32,6 @@ private class TestAppointments {
     
     
     
-    /*** ---------- Test trigger appointmentCreation ---------- ***/
-    static testmethod void testTriggerCreation() {
-        
-        /*** ---------- New doctor ---------- ***/
-        // Setting doctor's working hours
-        Time newWorkingHoursStart = Time.newInstance(09, 00, 00, 000);
-        Time newWorkingHoursEnd = Time.newInstance(12, 00, 00, 000);
-        
-        Doctor__c NewDoctor = TestAppointments.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
-        Insert NewDoctor;
-        System.assertEquals(1, [SELECT Id FROM Doctor__c].size());
-        
-        /*** ---------- New patient ---------- ***/
-		Patient__c NewPatient = TestAppointments.CreateTestPatient(1); 
-        Insert NewPatient;
-        System.assertEquals(1, [SELECT Id FROM Patient__c].size());        
-        
-        /*** ---------- New appointment1 with correct time for doctor ---------- ***/
-        // Setting new appointment datetime
-        Datetime newCorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 10, 00, 00);
-        
-        Appointment__c TestAppointment1 = TestAppointments.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor, NewPatient);
-        insert TestAppointment1;
-        System.assertEquals(1, [SELECT Id FROM Appointment__c].size());
-        
-        /*** ---------- New appointment2 with correct time for doctor ---------- ***/
-        // Setting new appointment datetime
-        Datetime newCorrectDatetime2 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
-        
-        Appointment__c TestAppointment2 = TestAppointments.CreateTestAppointment(2, newCorrectDatetime2, 30, NewDoctor, NewPatient);
-        insert TestAppointment2;
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
-        
-        /*** ---------- New appointment with incorrect time for already existing appointment ---------- ***/
-        // Setting new appointment datetime
-        Datetime newIncorrectDatetime = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
-        
-        Appointment__c TestAppointment3 = TestAppointments.CreateTestAppointment(3, newIncorrectDatetime, 10, NewDoctor, NewPatient);
-        try {
-            insert TestAppointment3;
-        }
-        catch (Exception e) {
-            Boolean expectedCustomExceptionThrown = e.getMessage().contains('Appointment for this doctor on this time already exists. ' + 
-                                                                            'Please, choose another time.') ? true : false;
-            System.assertEquals(true, expectedCustomExceptionThrown);
-            
-            Boolean expectedExceptionThrown = e.getMessage().contains('FIELD_CUSTOM_VALIDATION_EXCEPTION') ? true : false;
-            System.assertEquals(true, expectedExceptionThrown);
-        }
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
-    }
-    
-    
-    
-    /*** ---------- Test trigger appointmentCreationWithHours ---------- ***/
-    static testmethod void testTriggerCreationWorkingHours() {
-        
-        /*** ---------- New doctor ---------- ***/        
-        // Setting doctor's working hours
-        Time newWorkingHoursStart = Time.newInstance(09, 00, 00, 000);
-        Time newWorkingHoursEnd = Time.newInstance(12, 00, 00, 000);
-        
-        Doctor__c NewDoctor = TestAppointments.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
-        Insert NewDoctor;
-        System.assertEquals(1, [SELECT Id FROM Doctor__c].size());
-        
-        /*** ---------- New patient ---------- ***/
-        Patient__c NewPatient = TestAppointments.CreateTestPatient(1);
-        Insert NewPatient;
-        System.assertEquals(1, [SELECT Id FROM Doctor__c].size());
-        
-        /*** ---------- New appointment1 with correct time for doctor ---------- ***/
-        Datetime newCorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 10, 00, 00);
-        
-        Appointment__c TestAppointment1 = TestAppointments.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor, NewPatient);
-        insert TestAppointment1;
-        System.assertEquals(1, [SELECT Id FROM Appointment__c].size());
-        
-        /*** ---------- New appointment2 with correct time for doctor ---------- ***/
-        Datetime newCorrectDatetime2 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
-        
-        Appointment__c TestAppointment2 = TestAppointments.CreateTestAppointment(1, newCorrectDatetime2, 30, NewDoctor, NewPatient);
-        insert TestAppointment2;
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
-        
-        /*** ---------- New appointment with incorrect time for doctor's working hours ---------- ***/
-        Datetime newIncorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 14, 00, 00);
-        
-        Appointment__c TestAppointment3 = TestAppointments.CreateTestAppointment(1, newIncorrectDatetime1, 10, NewDoctor, NewPatient);
-        try {
-            insert TestAppointment3;
-        }
-        catch (Exception e) {
-            Boolean expectedCustomExceptionThrown = e.getMessage().contains('This doctor is not working on chosen time or your appointment time is more than doctor\'s workday end. ' + 
-                                                                            'Please, choose another time.') ? true : false;
-            System.assertEquals(true, expectedCustomExceptionThrown);
-            
-            Boolean expectedExceptionThrown = e.getMessage().contains('FIELD_CUSTOM_VALIDATION_EXCEPTION') ? true : false;
-            System.assertEquals(true, expectedExceptionThrown);
-            
-        }
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
-    }
-    
-    
-    
     /*** ---------- Test custom controller ---------- ***/
     static testmethod void testAppointmentsController() {
         AppointmentsController TestAppointmentsController = new AppointmentsController();
@@ -147,8 +41,8 @@ private class TestAppointments {
         Time newWorkingHoursStart = Time.newInstance(09, 00, 00, 000);
         Time newWorkingHoursEnd = Time.newInstance(12, 00, 00, 000);
         
-        Doctor__c NewDoctor1 = TestAppointments.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
-        Doctor__c NewDoctor2 = TestAppointments.CreateTestDoctor(2, newWorkingHoursStart, newWorkingHoursEnd);
+        Doctor__c NewDoctor1 = AppointmentsControllerTest.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
+        Doctor__c NewDoctor2 = AppointmentsControllerTest.CreateTestDoctor(2, newWorkingHoursStart, newWorkingHoursEnd);
         Insert NewDoctor1;
         Insert NewDoctor2;
         System.assertEquals(2, [SELECT Id FROM Doctor__c].size());
@@ -159,8 +53,8 @@ private class TestAppointments {
         System.assertEquals(selectedDoctorOptions.get(1).getLabel(), 'Test Doctor 1');
         
         /*** New patient ***/
-        Patient__c NewPatient1 = TestAppointments.CreateTestPatient(1);
-        Patient__c NewPatient2 = TestAppointments.CreateTestPatient(2);
+        Patient__c NewPatient1 = AppointmentsControllerTest.CreateTestPatient(1);
+        Patient__c NewPatient2 = AppointmentsControllerTest.CreateTestPatient(2);
         Insert NewPatient1;
         Insert NewPatient2;
         System.assertEquals(2, [SELECT Id FROM Patient__c].size());
@@ -173,35 +67,35 @@ private class TestAppointments {
         /*** New appointment1 with correct time for doctor1 and patient1 ***/
         Datetime newCorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 10, 00, 00);
         
-        Appointment__c TestAppointment1 = TestAppointments.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor1, NewPatient1);
+        Appointment__c TestAppointment1 = AppointmentsControllerTest.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor1, NewPatient1);
         insert TestAppointment1;
         System.assertEquals(1, [SELECT Id FROM Appointment__c].size());
         
         /*** New appointment2 with correct time for doctor1 and patient2 ***/
         Datetime newCorrectDatetime2 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
         
-        Appointment__c TestAppointment2 = TestAppointments.CreateTestAppointment(2, newCorrectDatetime2, 40, NewDoctor1, NewPatient2);
+        Appointment__c TestAppointment2 = AppointmentsControllerTest.CreateTestAppointment(2, newCorrectDatetime2, 40, NewDoctor1, NewPatient2);
         insert TestAppointment2;
         System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
         
         /*** New appointment3 with correct time for doctor2 and patient1 ***/
         Datetime newCorrectDatetime3 = Datetime.newInstance(2021, 02, 03, 10, 00, 00);
         
-        Appointment__c TestAppointment3 = TestAppointments.CreateTestAppointment(3, newCorrectDatetime3, 15, NewDoctor2, NewPatient1);
+        Appointment__c TestAppointment3 = AppointmentsControllerTest.CreateTestAppointment(3, newCorrectDatetime3, 15, NewDoctor2, NewPatient1);
         insert TestAppointment3;
         System.assertEquals(3, [SELECT Id FROM Appointment__c].size());
         
         /*** New appointment4 with correct time for doctor2 and patient2 ***/
         Datetime newCorrectDatetime4 = Datetime.newInstance(2021, 02, 03, 10, 30, 00);
         
-        Appointment__c TestAppointment4 = TestAppointments.CreateTestAppointment(4, newCorrectDatetime4, 15, NewDoctor2, NewPatient2);
+        Appointment__c TestAppointment4 = AppointmentsControllerTest.CreateTestAppointment(4, newCorrectDatetime4, 15, NewDoctor2, NewPatient2);
         insert TestAppointment4;
         System.assertEquals(4, [SELECT Id FROM Appointment__c].size());
         
         /*** New appointment5 with correct time for doctor2 and patient2 ***/
         Datetime newCorrectDatetime5 = Datetime.newInstance(2021, 02, 03, 11, 00, 00);
         
-        Appointment__c TestAppointment5 = TestAppointments.CreateTestAppointment(5, newCorrectDatetime5, 40, NewDoctor2, NewPatient2);
+        Appointment__c TestAppointment5 = AppointmentsControllerTest.CreateTestAppointment(5, newCorrectDatetime5, 40, NewDoctor2, NewPatient2);
         insert TestAppointment5;
         System.assertEquals(5, [SELECT Id FROM Appointment__c].size());
         
@@ -356,19 +250,19 @@ private class TestAppointments {
         Time newWorkingHoursStartLoop = Time.newInstance(01, 00, 00, 000);
         Time newWorkingHoursEndLoop = Time.newInstance(23, 00, 00, 000);
         
-        Doctor__c NewDoctorForLoop = TestAppointments.CreateTestDoctor(3, newWorkingHoursStartLoop, newWorkingHoursEndLoop);
+        Doctor__c NewDoctorForLoop = AppointmentsControllerTest.CreateTestDoctor(3, newWorkingHoursStartLoop, newWorkingHoursEndLoop);
         insert NewDoctorForLoop;
         System.assertEquals(3, [SELECT Id FROM Doctor__c].size());
         
         /*** New Patient for loop ***/
-        Patient__c NewPatientForLoop = TestAppointments.CreateTestPatient(3);
+        Patient__c NewPatientForLoop = AppointmentsControllerTest.CreateTestPatient(3);
         insert NewPatientForLoop;
         System.assertEquals(3, [SELECT Id FROM Patient__c].size());
         
         // Create additional appointments to fulfill else method conditionals
         for (Integer i = 0; i < 5; i++) {
             Datetime newCorrectDatetimeLoop = Datetime.newInstance(2021, 02, 02, 01, 00+i*2, 00);
-            Appointment__c TestAppointmentLoop = TestAppointments.CreateTestAppointment(i, newCorrectDatetimeLoop, 1, NewDoctorForLoop, NewPatientForLoop);
+            Appointment__c TestAppointmentLoop = AppointmentsControllerTest.CreateTestAppointment(i, newCorrectDatetimeLoop, 1, NewDoctorForLoop, NewPatientForLoop);
             insert TestAppointmentLoop;
         }
         
