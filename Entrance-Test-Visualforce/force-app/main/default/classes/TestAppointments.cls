@@ -75,7 +75,7 @@ private class TestAppointments {
         }
         catch (Exception e) {
             Boolean expectedCustomExceptionThrown = e.getMessage().contains('Appointment for this doctor on this time already exists. ' + 
-                                                                      'Please, choose another time.') ? true : false;
+                                                                            'Please, choose another time.') ? true : false;
             System.assertEquals(true, expectedCustomExceptionThrown);
             
             Boolean expectedExceptionThrown = e.getMessage().contains('FIELD_CUSTOM_VALIDATION_EXCEPTION') ? true : false;
