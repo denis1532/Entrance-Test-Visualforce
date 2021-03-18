@@ -42,13 +42,6 @@ public class AppointmentsController {
         // Initialization properties
         this.sortOrder = 'Doctor__r.Name';
         this.ascOrDesc = ' ASC ';
-        this.selectedDoctorId = null;
-        this.selectedPatientId = null;
-        this.doctorsAndPatientsQuery = '';
-        this.dateQuery = '';
-        this.searchDate = null;
-        this.durationQuery = '';
-        this.searchDuration = null;
         this.counter = 0;
         this.listSize = 10;
     }
@@ -83,6 +76,8 @@ public class AppointmentsController {
         // Getting DOCTOR and PATIENT picklist value
         if (selectedDoctorId == null && selectedPatientId == null) {
             this.doctorsAndPatientsQuery = '';
+            this.workingHoursQuery = '';
+            this.dateQuery = '';
             this.durationQuery = '';
         } else {
             this.doctorsAndPatientsQuery = 'WHERE (' +
@@ -94,7 +89,6 @@ public class AppointmentsController {
 
         // Setting duration query
         if (searchDuration == 0 || searchDuration == null) {
-            this.durationQuery = '';
             this.searchDuration = null;
         } else {
             this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDate == null
@@ -105,7 +99,6 @@ public class AppointmentsController {
 
         // Setting date query
         if (searchDate == null) {
-            this.dateQuery = '';
             this.searchDate = null;
         } else {
             lowerComparisonDate = searchDate;
@@ -151,7 +144,6 @@ public class AppointmentsController {
              * tried making fields' labels visible, but without its' values (failed :( )
              * if null, then it this section isn't displayed at all
              */
-            this.workingHours = '';
             return null;
         } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is
             this.workingHours = 'WHERE Doctor__c.Name = ' + '\'' + selectedDoctorId + '\'';
