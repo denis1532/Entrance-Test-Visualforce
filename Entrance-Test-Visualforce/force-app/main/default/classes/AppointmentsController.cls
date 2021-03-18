@@ -2,25 +2,25 @@ public class AppointmentsController {
     // Query string
     public String query;
     public String workingHoursQuery;
-    
-    // Additions to queries   
+
+    // Additions to queries
     public String doctorsAndPatientsQuery;
     public String workingHours;
     public String dateQuery;
     public String durationQuery;
-    
+
     // Total records query
     public String totalRecordsNumber;
-    
+
     // Sort by field
     public String sortOrder {get;set;}
     // Sort order
     private String ascOrDesc;
-    
+
     // Picklist options
     public String selectedDoctorName {get;set;}
     public String selectedPatientName {get;set;}
-    
+
     // Date search
     public Date searchDate {get;set;}
     // Comparison for date query
@@ -28,16 +28,16 @@ public class AppointmentsController {
     Datetime upperComparisonDate;
     String formattedLower;
     String formattedUpper;
-    
+
     // Duration search
     public Integer searchDuration {get;set;}
-    
+
     // Pagination
     private Integer counter;
     private Integer listSize;
     public Integer totalSize {get;set;}
-    
-    /*** ---------- Init ---------- ***/    
+
+    /*** ---------- Init ---------- ***/
     public AppointmentsController() {
         // Initialization properties
         this.sortOrder = 'Doctor__r.Name';
@@ -52,31 +52,31 @@ public class AppointmentsController {
         this.counter = 0;
         this.listSize = 10;
     }
-    
+
     /*** ---------- Picklists ---------- ***/
-    
+
     // Adding options to DOCTOR picklist
     public List<SelectOption> getSelectedDoctor() {
         List<SelectOption> doctors = new List<SelectOption>();
         doctors.add(new SelectOption('','-All-'));
         for (Doctor__c doctor : [SELECT Id, Name FROM Doctor__c ORDER BY Name ASC]) {
-            doctors.add(new SelectOption(doctor.Name, doctor.Name));
+            doctors.add(new SelectOption(doctor.Id, doctor.Name));
         }
-        
+
         return doctors;
     }
-    
+
     // Adding options to PATIENT picklist
     public List<SelectOption> getSelectedPatient() {
         List<SelectOption> patients = new List<SelectOption>();
         patients.add(new SelectOption('','-All-'));
         for (Patient__c patient : [SELECT Id, Name FROM Patient__c ORDER BY Name ASC]) {
-            patients.add(new SelectOption(patient.Name, patient.Name));
+            patients.add(new SelectOption(patient.Id, patient.Name));
         }
-        
+
         return patients;
     }
-    
+
     /*** ---------- Main ---------- ***/
     /*** Table results ***/
     public List<Appointment__c> getAppointments() {
@@ -85,24 +85,24 @@ public class AppointmentsController {
             this.doctorsAndPatientsQuery = '';
             this.durationQuery = '';
         } else {
-            this.doctorsAndPatientsQuery = 'WHERE (' + 
-                (selectedDoctorName != null ? 'Doctor__r.Name = ' + '\'' + selectedDoctorName + '\'' : '') + 
-                (selectedDoctorName != null && selectedPatientName != null ? ' AND ' : '') + 
-        		(selectedPatientName != null ? 'Patient__r.Name = ' + '\'' + selectedPatientName + '\'' : '') + 
+            this.doctorsAndPatientsQuery = 'WHERE (' +
+                (selectedDoctorName != null ? 'Doctor__r.Id = ' + '\'' + selectedDoctorName + '\'' : '') +
+                (selectedDoctorName != null && selectedPatientName != null ? ' AND ' : '') +
+        		(selectedPatientName != null ? 'Patient__r.Id = ' + '\'' + selectedPatientName + '\'' : '') +
                 ') ';
         }
-        
+
         // Setting duration query
         if (searchDuration == 0 || searchDuration == null) {
             this.durationQuery = '';
             this.searchDuration = null;
         } else {
             this.durationQuery = (selectedDoctorName == null && selectedPatientName == null && searchDate == null
-                                  ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') ' 
+                                  ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') '
                                   : 'AND (Duration_in_minutes__c = ' + searchDuration + ') '
                                  );
         }
-        
+
         // Setting date query
         if (searchDate == null) {
             this.dateQuery = '';
@@ -110,63 +110,63 @@ public class AppointmentsController {
         } else {
             lowerComparisonDate = searchDate;
             upperComparisonDate = searchDate.addDays(1);
-            
+
             // Formatting to ISO date value to enable comparison in query
             formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
             formattedUpper = upperComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
-            
-            this.dateQuery = (selectedDoctorName == null && selectedPatientName == null 
-                              ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') ' 
+
+            this.dateQuery = (selectedDoctorName == null && selectedPatientName == null
+                              ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                               : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                              );
         }
-        
-        // Customizing main query 
+
+        // Customizing main query
         query = 'SELECT Id, Doctor__r.Name, Doctor__r.Working_Hours_Start__c, Doctor__r.Working_Hours_End__c, Patient__r.Name, Appointment_Date__c, Duration_in_minutes__c  ' +
-            	'FROM Appointment__c ' + 
-            	doctorsAndPatientsQuery + 
-            	dateQuery + 
-            	durationQuery + 
-            	'ORDER BY ' + sortOrder + ascOrDesc + 'NULLS LAST ' + 
+            	'FROM Appointment__c ' +
+            	doctorsAndPatientsQuery +
+            	dateQuery +
+            	durationQuery +
+            	'ORDER BY ' + sortOrder + ascOrDesc + 'NULLS LAST ' +
             	'LIMIT :listSize OFFSET :counter';
-        
+
         List<Appointment__c> results = Database.query(query);
-        
+
         // Pagination total pages variable
-        totalRecordsNumber = 'SELECT Count() ' + 
-            				 'FROM Appointment__c ' + 
-            				 doctorsAndPatientsQuery + 
-            				 dateQuery + 
+        totalRecordsNumber = 'SELECT Count() ' +
+            				 'FROM Appointment__c ' +
+            				 doctorsAndPatientsQuery +
+            				 dateQuery +
             				 durationQuery;
         this.totalSize = Database.countQuery(totalRecordsNumber);
 
         return results;
     }
-    
+
     /***  Working hours section results ***/
     public List<Doctor__c> getHours() {
         if (selectedDoctorName == null) {
             /* List<Doctor__c> hours = new List<Doctor__c>();
-             * 
+             *
              * tried making fields' labels visible, but without its' values (failed :( )
              * if null, then it this section isn't displayed at all
-             */ 
+             */
             this.workingHours = '';
             return null;
-        } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is 
+        } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is
             this.workingHours = 'WHERE Doctor__c.Name = ' + '\'' + selectedDoctorName + '\'';
         }
-        
+
         // Customizing hours query
-        workingHoursQuery = 'SELECT Id, Name, Working_Hours_Start__c, Working_Hours_End__c ' + 
-            				'FROM Doctor__c ' + 
+        workingHoursQuery = 'SELECT Id, Name, Working_Hours_Start__c, Working_Hours_End__c ' +
+            				'FROM Doctor__c ' +
             				workingHours;
-        
+
         // Returnin hours query results
         List<Doctor__c> hours = Database.query(workingHoursQuery);
         return hours;
     }
-    
+
     /*** Field order ***/
     public void sortByField() {
         if (ascOrDesc == ' ASC ') {
@@ -175,41 +175,41 @@ public class AppointmentsController {
             ascOrDesc = ' ASC ';
         }
     }
-    
+
     /*** ---------- Clear fields buttons ---------- ***/
-    
+
     // Reset doctor's picklist
     public PageReference resetSearchAppointmentsByDoctor() {
         counter = 0;
         this.selectedDoctorName = null;
         return null;
     }
-    
+
     // Reset patient's picklist
     public PageReference resetSearchAppointmentsByPatient() {
         counter = 0;
         this.selectedPatientName = null;
         return null;
     }
-    
+
     // Reset date field
     public PageReference resetSearchAppointmentByDate() {
         counter = 0;
         this.searchDate = null;
         return null;
     }
-    
+
     // Reset duration field
     public PageReference resetSearchAppointmentByDuration() {
         counter = 0;
         this.searchDuration = null;
         return null;
     }
-    
+
     /*** ---------- PAGINATION ---------- ***/
-    
+
     // First Page
-    public PageReference Beginning() { 
+    public PageReference Beginning() {
     	counter = 0;
       	return null;
     }
@@ -221,13 +221,13 @@ public class AppointmentsController {
    	}
 
     // Next Page
-   	public PageReference Next() { 
+   	public PageReference Next() {
       	counter += listSize;
       	return null;
    	}
 
  	// Last Page
-   	public PageReference End() { 
+   	public PageReference End() {
       	counter = totalSize - math.mod(totalSize, listSize);
       	return null;
    	}
@@ -247,7 +247,7 @@ public class AppointmentsController {
    	public Integer getPageNumber() {
       	return counter/listSize + 1;
    	}
-    
+
     // Pages counter
    	public Integer getTotalPages() {
       	if (math.mod(totalSize, listSize) > 0) {
