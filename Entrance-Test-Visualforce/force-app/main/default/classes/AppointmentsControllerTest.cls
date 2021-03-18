@@ -116,7 +116,7 @@ private class AppointmentsControllerTest {
         System.assertEquals(null, TestHours);
 
         /*** Set doctor for search ***/
-        TestAppointmentsController.selectedDoctorId = selectedDoctorOptions.get(1).getLabel();
+        TestAppointmentsController.selectedDoctorId = selectedDoctorOptions.get(1).getValue();
         TestAppointmentsController.getSelectedDoctor();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
@@ -134,7 +134,7 @@ private class AppointmentsControllerTest {
         System.assertEquals(5, TestAppointmentsList.size());
 
         /*** Set patient for search ***/
-        TestAppointmentsController.selectedPatientId = selectedPatientOptions.get(1).getLabel();
+        TestAppointmentsController.selectedPatientId = selectedPatientOptions.get(1).getValue();
         TestAppointmentsController.getSelectedPatient();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
@@ -169,13 +169,13 @@ private class AppointmentsControllerTest {
 
         /*** ---------- Test main queries IN TOTAL ---------- ***/
         /*** Set doctor for search ***/
-        TestAppointmentsController.selectedDoctorId = selectedDoctorOptions.get(2).getLabel();
+        TestAppointmentsController.selectedDoctorId = selectedDoctorOptions.get(2).getValue();
         TestAppointmentsController.getSelectedDoctor();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(3, TestAppointmentsList.size());
 
         /*** Set patient for search ***/
-        TestAppointmentsController.selectedPatientId = selectedPatientOptions.get(2).getLabel();
+        TestAppointmentsController.selectedPatientId = selectedPatientOptions.get(2).getValue();
         TestAppointmentsController.getSelectedPatient();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());

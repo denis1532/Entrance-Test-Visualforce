@@ -146,7 +146,7 @@ public class AppointmentsController {
              */
             return null;
         } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is
-            this.workingHours = 'WHERE Doctor__c.Name = ' + '\'' + selectedDoctorId + '\'';
+            this.workingHours = 'WHERE Doctor__c.Id = ' + '\'' + selectedDoctorId + '\'';
         }
 
         // Customizing hours query
