@@ -18,8 +18,8 @@ public class AppointmentsController {
     private String ascOrDesc;
 
     // Picklist options
-    public String selectedDoctorName {get;set;}
-    public String selectedPatientName {get;set;}
+    public String selectedDoctorId {get;set;}
+    public String selectedPatientId {get;set;}
 
     // Date search
     public Date searchDate {get;set;}
@@ -42,8 +42,8 @@ public class AppointmentsController {
         // Initialization properties
         this.sortOrder = 'Doctor__r.Name';
         this.ascOrDesc = ' ASC ';
-        this.selectedDoctorName = null;
-        this.selectedPatientName = null;
+        this.selectedDoctorId = null;
+        this.selectedPatientId = null;
         this.doctorsAndPatientsQuery = '';
         this.dateQuery = '';
         this.searchDate = null;
@@ -81,14 +81,14 @@ public class AppointmentsController {
     /*** Table results ***/
     public List<Appointment__c> getAppointments() {
         // Getting DOCTOR and PATIENT picklist value
-        if (selectedDoctorName == null && selectedPatientName == null) {
+        if (selectedDoctorId == null && selectedPatientId == null) {
             this.doctorsAndPatientsQuery = '';
             this.durationQuery = '';
         } else {
             this.doctorsAndPatientsQuery = 'WHERE (' +
-                (selectedDoctorName != null ? 'Doctor__r.Id = ' + '\'' + selectedDoctorName + '\'' : '') +
-                (selectedDoctorName != null && selectedPatientName != null ? ' AND ' : '') +
-        		(selectedPatientName != null ? 'Patient__r.Id = ' + '\'' + selectedPatientName + '\'' : '') +
+                (selectedDoctorId != null ? 'Doctor__r.Id = ' + '\'' + selectedDoctorId + '\'' : '') +
+                (selectedDoctorId != null && selectedPatientId != null ? ' AND ' : '') +
+        		(selectedPatientId != null ? 'Patient__r.Id = ' + '\'' + selectedPatientId + '\'' : '') +
                 ') ';
         }
 
@@ -97,7 +97,7 @@ public class AppointmentsController {
             this.durationQuery = '';
             this.searchDuration = null;
         } else {
-            this.durationQuery = (selectedDoctorName == null && selectedPatientName == null && searchDate == null
+            this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDate == null
                                   ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') '
                                   : 'AND (Duration_in_minutes__c = ' + searchDuration + ') '
                                  );
@@ -115,7 +115,7 @@ public class AppointmentsController {
             formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
             formattedUpper = upperComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
 
-            this.dateQuery = (selectedDoctorName == null && selectedPatientName == null
+            this.dateQuery = (selectedDoctorId == null && selectedPatientId == null
                               ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                               : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                              );
@@ -145,7 +145,7 @@ public class AppointmentsController {
 
     /***  Working hours section results ***/
     public List<Doctor__c> getHours() {
-        if (selectedDoctorName == null) {
+        if (selectedDoctorId == null) {
             /* List<Doctor__c> hours = new List<Doctor__c>();
              *
              * tried making fields' labels visible, but without its' values (failed :( )
@@ -154,7 +154,7 @@ public class AppointmentsController {
             this.workingHours = '';
             return null;
         } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is
-            this.workingHours = 'WHERE Doctor__c.Name = ' + '\'' + selectedDoctorName + '\'';
+            this.workingHours = 'WHERE Doctor__c.Name = ' + '\'' + selectedDoctorId + '\'';
         }
 
         // Customizing hours query
@@ -181,14 +181,14 @@ public class AppointmentsController {
     // Reset doctor's picklist
     public PageReference resetSearchAppointmentsByDoctor() {
         counter = 0;
-        this.selectedDoctorName = null;
+        this.selectedDoctorId = null;
         return null;
     }
 
     // Reset patient's picklist
     public PageReference resetSearchAppointmentsByPatient() {
         counter = 0;
-        this.selectedPatientName = null;
+        this.selectedPatientId = null;
         return null;
     }
 
