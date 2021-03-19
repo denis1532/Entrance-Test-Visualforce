@@ -30,8 +30,12 @@ private class AppointmentsControllerTest {
         return TestAppointment;
     }
 
-
-
+    private static String doctorsAssertion = 'SELECT Id FROM Doctor__c';
+    private static String patientsAssertion = 'SELECT Id FROM Doctor__c';
+    private static String appointmentsAssertion = 'SELECT Id FROM Appointment__c';
+    
+    
+    
     /*** ---------- Test custom controller ---------- ***/
     static testmethod void testAppointmentsController() {
         AppointmentsController TestAppointmentsController = new AppointmentsController();
@@ -45,7 +49,7 @@ private class AppointmentsControllerTest {
         Doctor__c NewDoctor2 = AppointmentsControllerTest.CreateTestDoctor(2, newWorkingHoursStart, newWorkingHoursEnd);
         Insert NewDoctor1;
         Insert NewDoctor2;
-        System.assertEquals(2, [SELECT Id FROM Doctor__c].size());
+        System.assertEquals(2, Database.query(doctorsAssertion).size());
 
         /*** ---------- Test doctors select options ---------- ***/
         List<SelectOption> selectedDoctorOptions = TestAppointmentsController.getSelectedDoctor();
@@ -57,7 +61,7 @@ private class AppointmentsControllerTest {
         Patient__c NewPatient2 = AppointmentsControllerTest.CreateTestPatient(2);
         Insert NewPatient1;
         Insert NewPatient2;
-        System.assertEquals(2, [SELECT Id FROM Patient__c].size());
+        System.assertEquals(2, Database.query(patientsAssertion).size());
 
         /*** ---------- Test patients select options ---------- ***/
         List<SelectOption> selectedPatientOptions = TestAppointmentsController.getSelectedPatient();
@@ -69,35 +73,35 @@ private class AppointmentsControllerTest {
 
         Appointment__c TestAppointment1 = AppointmentsControllerTest.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor1, NewPatient1);
         insert TestAppointment1;
-        System.assertEquals(1, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(1, Database.query(appointmentsAssertion).size());
 
         /*** New appointment2 with correct time for doctor1 and patient2 ***/
         Datetime newCorrectDatetime2 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
 
         Appointment__c TestAppointment2 = AppointmentsControllerTest.CreateTestAppointment(2, newCorrectDatetime2, 40, NewDoctor1, NewPatient2);
         insert TestAppointment2;
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(2, Database.query(appointmentsAssertion).size());
 
         /*** New appointment3 with correct time for doctor2 and patient1 ***/
         Datetime newCorrectDatetime3 = Datetime.newInstance(2021, 02, 03, 10, 00, 00);
 
         Appointment__c TestAppointment3 = AppointmentsControllerTest.CreateTestAppointment(3, newCorrectDatetime3, 15, NewDoctor2, NewPatient1);
         insert TestAppointment3;
-        System.assertEquals(3, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(3, Database.query(appointmentsAssertion).size());
 
         /*** New appointment4 with correct time for doctor2 and patient2 ***/
         Datetime newCorrectDatetime4 = Datetime.newInstance(2021, 02, 03, 10, 30, 00);
 
         Appointment__c TestAppointment4 = AppointmentsControllerTest.CreateTestAppointment(4, newCorrectDatetime4, 15, NewDoctor2, NewPatient2);
         insert TestAppointment4;
-        System.assertEquals(4, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(4, Database.query(appointmentsAssertion).size());
 
         /*** New appointment5 with correct time for doctor2 and patient2 ***/
         Datetime newCorrectDatetime5 = Datetime.newInstance(2021, 02, 03, 11, 00, 00);
 
         Appointment__c TestAppointment5 = AppointmentsControllerTest.CreateTestAppointment(5, newCorrectDatetime5, 40, NewDoctor2, NewPatient2);
         insert TestAppointment5;
-        System.assertEquals(5, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(5, Database.query(appointmentsAssertion).size());
 
         /*** ---------- Test getAppointments method ---------- ***/
         List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
@@ -146,9 +150,9 @@ private class AppointmentsControllerTest {
 
         /*** Set date for search ***/
         // Format existing test datetime to date format for search
-        Date formattedTestDate1 = date.newInstance(newCorrectDatetime1.year(), newCorrectDatetime1.month(), newCorrectDatetime1.day());
+        // *** Date formattedTestDate1 = date.newInstance(newCorrectDatetime1.year(), newCorrectDatetime1.month(), newCorrectDatetime1.day());
 
-        TestAppointmentsController.searchDate = formattedTestDate1;
+        TestAppointmentsController.searchDateTime = newCorrectDatetime1;
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
 
@@ -182,9 +186,9 @@ private class AppointmentsControllerTest {
 
         /*** Set date for search ***/
         // Format existing test datetime to date format for search
-        Date formattedTestDate2 = date.newInstance(newCorrectDatetime3.year(), newCorrectDatetime3.month(), newCorrectDatetime3.day());
+        // *** Date formattedTestDate2 = date.newInstance(newCorrectDatetime3.year(), newCorrectDatetime3.month(), newCorrectDatetime3.day());
 
-        TestAppointmentsController.searchDate = formattedTestDate2;
+        TestAppointmentsController.searchDateTime = newCorrectDatetime3;
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
 
@@ -252,12 +256,12 @@ private class AppointmentsControllerTest {
 
         Doctor__c NewDoctorForLoop = AppointmentsControllerTest.CreateTestDoctor(3, newWorkingHoursStartLoop, newWorkingHoursEndLoop);
         insert NewDoctorForLoop;
-        System.assertEquals(3, [SELECT Id FROM Doctor__c].size());
+        System.assertEquals(3, Database.query(doctorsAssertion).size());
 
         /*** New Patient for loop ***/
         Patient__c NewPatientForLoop = AppointmentsControllerTest.CreateTestPatient(3);
         insert NewPatientForLoop;
-        System.assertEquals(3, [SELECT Id FROM Patient__c].size());
+        System.assertEquals(3, Database.query(patientsAssertion).size());
 
         // Create additional appointments to fulfill else method conditionals
         for (Integer i = 0; i < 5; i++) {
@@ -267,7 +271,7 @@ private class AppointmentsControllerTest {
         }
 
         TestAppointmentsList = TestAppointmentsController.getAppointments();
-        System.assertEquals(10, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(10, Database.query(appointmentsAssertion).size());
 
         System.assertEquals(1, TestAppointmentsController.getTotalPages());
     }

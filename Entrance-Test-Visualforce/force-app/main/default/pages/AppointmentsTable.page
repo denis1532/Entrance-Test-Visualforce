@@ -21,6 +21,7 @@
             margin: 0;
         }
     </style>
+
     <apex:form >
     	<apex:pageBlock id="appointments_list" title="Appointments table" >
             <!-- Pagination buttons -->

@@ -112,20 +112,21 @@ public class AppointmentsController {
                                  );
         }
 
+        // Setting date query
         if (searchDateTime == null) {
             this.NewAppointment.Appointment_Date__c = null;
 
             this.searchDateTime = null;
         } else {
             conversedDate = Date.newInstance(searchDateTime.year(), searchDateTime.month(), searchDateTime.day());
-
+            
             lowerComparisonDate = conversedDate;
             upperComparisonDate = conversedDate.addDays(1);
-
+            
             // Formatting to ISO date value to enable comparison in query
             formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
             formattedUpper = upperComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
-
+            
             this.dateQuery = (selectedDoctorId == null && selectedPatientId == null
                               ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                               : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '

@@ -30,6 +30,10 @@ private class AppointmentCreationTriggerTest {
         return TestAppointment;
     }
 	    
+    private static String doctorsAssertion = 'SELECT Id FROM Doctor__c';
+    private static String patientsAssertion = 'SELECT Id FROM Doctor__c';
+    private static String appointmentsAssertion = 'SELECT Id FROM Appointment__c';
+    
     
     
     /*** ---------- Test CheckDate ---------- ***/
@@ -42,12 +46,12 @@ private class AppointmentCreationTriggerTest {
         
         Doctor__c NewDoctor = AppointmentCreationTriggerTest.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
         Insert NewDoctor;
-        System.assertEquals(1, [SELECT Id FROM Doctor__c].size());
+        System.assertEquals(1, Database.query(doctorsAssertion).size());
         
         /*** ---------- New patient ---------- ***/
 		Patient__c NewPatient = AppointmentCreationTriggerTest.CreateTestPatient(1); 
         Insert NewPatient;
-        System.assertEquals(1, [SELECT Id FROM Patient__c].size());        
+        System.assertEquals(1, Database.query(patientsAssertion).size());        
         
         /*** ---------- New appointment1 with correct time for doctor ---------- ***/
         // Setting new appointment datetime
@@ -55,7 +59,7 @@ private class AppointmentCreationTriggerTest {
         
         Appointment__c TestAppointment1 = AppointmentCreationTriggerTest.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor, NewPatient);
         insert TestAppointment1;
-        System.assertEquals(1, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(1, Database.query(appointmentsAssertion).size());
         
         /*** ---------- New appointment2 with correct time for doctor ---------- ***/
         // Setting new appointment datetime
@@ -63,7 +67,7 @@ private class AppointmentCreationTriggerTest {
         
         Appointment__c TestAppointment2 = AppointmentCreationTriggerTest.CreateTestAppointment(2, newCorrectDatetime2, 30, NewDoctor, NewPatient);
         insert TestAppointment2;
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(2, Database.query(appointmentsAssertion).size());
         
         /*** ---------- New appointment with incorrect time for already existing appointment ---------- ***/
         // Setting new appointment datetime
@@ -81,7 +85,7 @@ private class AppointmentCreationTriggerTest {
             Boolean expectedExceptionThrown = e.getMessage().contains('FIELD_CUSTOM_VALIDATION_EXCEPTION') ? true : false;
             System.assertEquals(true, expectedExceptionThrown);
         }
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(2, Database.query(appointmentsAssertion).size());
     }
     
     
@@ -96,26 +100,26 @@ private class AppointmentCreationTriggerTest {
         
         Doctor__c NewDoctor = AppointmentCreationTriggerTest.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
         Insert NewDoctor;
-        System.assertEquals(1, [SELECT Id FROM Doctor__c].size());
+        System.assertEquals(1, Database.query(doctorsAssertion).size());
         
         /*** ---------- New patient ---------- ***/
         Patient__c NewPatient = AppointmentCreationTriggerTest.CreateTestPatient(1);
         Insert NewPatient;
-        System.assertEquals(1, [SELECT Id FROM Doctor__c].size());
+        System.assertEquals(1, Database.query(doctorsAssertion).size());
         
         /*** ---------- New appointment1 with correct time for doctor ---------- ***/
         Datetime newCorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 10, 00, 00);
         
         Appointment__c TestAppointment1 = AppointmentCreationTriggerTest.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor, NewPatient);
         insert TestAppointment1;
-        System.assertEquals(1, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(1, Database.query(appointmentsAssertion).size());
         
         /*** ---------- New appointment2 with correct time for doctor ---------- ***/
         Datetime newCorrectDatetime2 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
         
         Appointment__c TestAppointment2 = AppointmentCreationTriggerTest.CreateTestAppointment(1, newCorrectDatetime2, 30, NewDoctor, NewPatient);
         insert TestAppointment2;
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(2, Database.query(appointmentsAssertion).size());
         
         /*** ---------- New appointment with incorrect time for doctor's working hours ---------- ***/
         Datetime newIncorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 14, 00, 00);
@@ -133,6 +137,6 @@ private class AppointmentCreationTriggerTest {
             System.assertEquals(true, expectedExceptionThrown);
             
         }
-        System.assertEquals(2, [SELECT Id FROM Appointment__c].size());
+        System.assertEquals(2, Database.query(appointmentsAssertion).size());
     }
 }
