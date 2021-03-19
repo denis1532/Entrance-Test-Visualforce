@@ -22,8 +22,9 @@ public class AppointmentsController {
     public String selectedPatientId {get;set;}
 
     // Date search
-    public Date searchDate {get;set;}
+    public Datetime searchDateTime {get;set;}
     // Comparison for date query
+    Date conversedDate;
     Datetime lowerComparisonDate;
     Datetime upperComparisonDate;
     String formattedLower;
@@ -37,8 +38,7 @@ public class AppointmentsController {
     private Integer listSize;
     public Integer totalSize {get;set;}
 
-    // Pop-Up
-    public Boolean displayPopup {get;set;}
+    // Add New Appointment
     public Appointment__c NewAppointment {get;set;}
 
     /*** ---------- Init ---------- ***/
@@ -106,18 +106,21 @@ public class AppointmentsController {
         } else {
             this.NewAppointment.Duration_in_minutes__c = searchDuration;
 
-            this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDate == null
+            this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDateTime == null
                                   ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') '
                                   : 'AND (Duration_in_minutes__c = ' + searchDuration + ') '
                                  );
         }
 
-        // Setting date query
-        if (searchDate == null) {
-            this.searchDate = null;
+        if (searchDateTime == null) {
+            this.NewAppointment.Appointment_Date__c = null;
+
+            this.searchDateTime = null;
         } else {
-            lowerComparisonDate = searchDate;
-            upperComparisonDate = searchDate.addDays(1);
+            conversedDate = Date.newInstance(searchDateTime.year(), searchDateTime.month(), searchDateTime.day());
+
+            lowerComparisonDate = conversedDate;
+            upperComparisonDate = conversedDate.addDays(1);
 
             // Formatting to ISO date value to enable comparison in query
             formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
@@ -127,6 +130,8 @@ public class AppointmentsController {
                               ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                               : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                              );
+
+            this.NewAppointment.Appointment_Date__c = searchDateTime;
         }
 
         // Customizing main query
@@ -183,6 +188,14 @@ public class AppointmentsController {
         }
     }
 
+    /*** ---------- New Appointment ---------- ***/
+
+    // Add New Appointment
+    public PageReference saveNewAppointment() {
+        insert NewAppointment;
+        return null;
+    }
+
     /*** ---------- Clear fields buttons ---------- ***/
 
     // Reset doctor's picklist
@@ -202,7 +215,7 @@ public class AppointmentsController {
     // Reset date field
     public PageReference resetSearchAppointmentByDate() {
         counter = 0;
-        this.searchDate = null;
+        this.searchDateTime = null;
         return null;
     }
 
@@ -263,23 +276,4 @@ public class AppointmentsController {
          	return (totalSize/listSize);
       	}
    	}
-
-    /*** ---------- POP-UP ---------- ***/
-
-	// Show pop-up
-    public void showPopup() {
-    	displayPopup = true;
-    }
-
-	// Hide pop-up
-  	public void closePopup() {
-        displayPopup = false;
-    }
-
-    // Save new contact in pop-up
-    public PageReference saveNewAppointment() {
-        insert NewAppointment;
-        closePopup();
-        return null;
-    }
 }
