@@ -37,6 +37,10 @@ public class AppointmentsController {
     private Integer listSize;
     public Integer totalSize {get;set;}
 
+    // Pop-Up
+    public Boolean displayPopup {get;set;}
+    public Appointment__c NewAppointment {get;set;}
+
     /*** ---------- Init ---------- ***/
     public AppointmentsController() {
         // Initialization properties
@@ -44,6 +48,7 @@ public class AppointmentsController {
         this.ascOrDesc = ' ASC ';
         this.counter = 0;
         this.listSize = 10;
+        this.NewAppointment = new Appointment__c();
     }
 
     /*** ---------- Picklists ---------- ***/
@@ -75,11 +80,17 @@ public class AppointmentsController {
     public List<Appointment__c> getAppointments() {
         // Getting DOCTOR and PATIENT picklist value
         if (selectedDoctorId == null && selectedPatientId == null) {
+            this.NewAppointment.Doctor__c = null;
+            this.NewAppointment.Patient__c = null;
+
             this.doctorsAndPatientsQuery = '';
             this.workingHoursQuery = '';
             this.dateQuery = '';
             this.durationQuery = '';
         } else {
+            this.NewAppointment.Doctor__c = selectedDoctorId;
+            this.NewAppointment.Patient__c = selectedPatientId;
+
             this.doctorsAndPatientsQuery = 'WHERE (' +
                 (selectedDoctorId != null ? 'Doctor__r.Id = ' + '\'' + selectedDoctorId + '\'' : '') +
                 (selectedDoctorId != null && selectedPatientId != null ? ' AND ' : '') +
@@ -89,8 +100,12 @@ public class AppointmentsController {
 
         // Setting duration query
         if (searchDuration == 0 || searchDuration == null) {
+            this.NewAppointment.Duration_in_minutes__c = null;
+
             this.searchDuration = null;
         } else {
+            this.NewAppointment.Duration_in_minutes__c = searchDuration;
+
             this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDate == null
                                   ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') '
                                   : 'AND (Duration_in_minutes__c = ' + searchDuration + ') '
@@ -248,4 +263,23 @@ public class AppointmentsController {
          	return (totalSize/listSize);
       	}
    	}
+
+    /*** ---------- POP-UP ---------- ***/
+
+	// Show pop-up
+    public void showPopup() {
+    	displayPopup = true;
+    }
+
+	// Hide pop-up
+  	public void closePopup() {
+        displayPopup = false;
+    }
+
+    // Save new contact in pop-up
+    public PageReference saveNewAppointment() {
+        insert NewAppointment;
+        closePopup();
+        return null;
+    }
 }
