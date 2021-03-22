@@ -80,13 +80,10 @@ public class AppointmentsController {
     public List<Appointment__c> getAppointments() {
         // Getting DOCTOR and PATIENT picklist value
         if (selectedDoctorId == null && selectedPatientId == null) {
+            this.doctorsAndPatientsQuery = '';
+
             this.NewAppointment.Doctor__c = null;
             this.NewAppointment.Patient__c = null;
-
-            this.doctorsAndPatientsQuery = '';
-            this.workingHoursQuery = '';
-            this.dateQuery = '';
-            this.durationQuery = '';
         } else {
             this.NewAppointment.Doctor__c = selectedDoctorId;
             this.NewAppointment.Patient__c = selectedPatientId;
@@ -98,24 +95,11 @@ public class AppointmentsController {
                 ') ';
         }
 
-        // Setting duration query
-        if (searchDuration == 0 || searchDuration == null) {
-            this.NewAppointment.Duration_in_minutes__c = null;
-
-            this.searchDuration = null;
-        } else {
-            this.NewAppointment.Duration_in_minutes__c = searchDuration;
-
-            this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDateTime == null
-                                  ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') '
-                                  : 'AND (Duration_in_minutes__c = ' + searchDuration + ') '
-                                 );
-        }
-
         // Setting date query
         if (searchDateTime == null) {
-            this.NewAppointment.Appointment_Date__c = null;
+            this.dateQuery = '';
 
+            this.NewAppointment.Appointment_Date__c = null;
             this.searchDateTime = null;
         } else {
             this.NewAppointment.Appointment_Date__c = searchDateTime;
@@ -133,6 +117,21 @@ public class AppointmentsController {
                               ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                               : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                              );
+        }
+
+        // Setting duration query
+        if (searchDuration == 0 || searchDuration == null) {
+            this.durationQuery = '';
+
+            this.NewAppointment.Duration_in_minutes__c = null;
+            this.searchDuration = null;
+        } else {
+            this.NewAppointment.Duration_in_minutes__c = searchDuration;
+
+            this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDateTime == null
+                                  ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') '
+                                  : 'AND (Duration_in_minutes__c = ' + searchDuration + ') '
+                                 );
         }
 
         // Customizing main query
@@ -160,13 +159,10 @@ public class AppointmentsController {
     /***  Working hours section results ***/
     public List<Doctor__c> getHours() {
         if (selectedDoctorId == null) {
-            /* List<Doctor__c> hours = new List<Doctor__c>();
-             *
-             * tried making fields' labels visible, but without its' values (failed :( )
-             * if null, then it this section isn't displayed at all
-             */
+            this.workingHoursQuery = '';
+
             return null;
-        } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is
+        } else {
             this.workingHours = 'WHERE Doctor__c.Id = ' + '\'' + selectedDoctorId + '\'';
         }
 
