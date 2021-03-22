@@ -83,6 +83,9 @@ public class AppointmentsController {
             this.NewAppointment.Doctor__c = null;
             this.NewAppointment.Patient__c = null;
 
+            system.debug(NewAppointment.Doctor__c);
+            system.debug(NewAppointment.Patient__c);
+
             this.doctorsAndPatientsQuery = '';
             this.workingHoursQuery = '';
             this.dateQuery = '';
@@ -90,6 +93,9 @@ public class AppointmentsController {
         } else {
             this.NewAppointment.Doctor__c = selectedDoctorId;
             this.NewAppointment.Patient__c = selectedPatientId;
+
+            system.debug(NewAppointment.Doctor__c);
+            system.debug(NewAppointment.Patient__c);
 
             this.doctorsAndPatientsQuery = 'WHERE (' +
                 (selectedDoctorId != null ? 'Doctor__r.Id = ' + '\'' + selectedDoctorId + '\'' : '') +
@@ -102,9 +108,13 @@ public class AppointmentsController {
         if (searchDuration == 0 || searchDuration == null) {
             this.NewAppointment.Duration_in_minutes__c = null;
 
+            system.debug(NewAppointment.Duration_in_minutes__c);
+
             this.searchDuration = null;
         } else {
             this.NewAppointment.Duration_in_minutes__c = searchDuration;
+
+            system.debug(NewAppointment.Duration_in_minutes__c);
 
             this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDateTime == null
                                   ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') '
@@ -116,23 +126,27 @@ public class AppointmentsController {
         if (searchDateTime == null) {
             this.NewAppointment.Appointment_Date__c = null;
 
+            system.debug(NewAppointment.Appointment_Date__c);
+
             this.searchDateTime = null;
         } else {
+            this.NewAppointment.Appointment_Date__c = searchDateTime;
+
             conversedDate = Date.newInstance(searchDateTime.year(), searchDateTime.month(), searchDateTime.day());
-            
+
             lowerComparisonDate = conversedDate;
             upperComparisonDate = conversedDate.addDays(1);
-            
+
             // Formatting to ISO date value to enable comparison in query
             formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
             formattedUpper = upperComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
-            
+
             this.dateQuery = (selectedDoctorId == null && selectedPatientId == null
                               ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                               : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                              );
 
-            this.NewAppointment.Appointment_Date__c = searchDateTime;
+            system.debug(NewAppointment.Appointment_Date__c);
         }
 
         // Customizing main query
@@ -153,6 +167,8 @@ public class AppointmentsController {
             				 dateQuery +
             				 durationQuery;
         this.totalSize = Database.countQuery(totalRecordsNumber);
+
+        system.debug(NewAppointment);
 
         return results;
     }
@@ -194,6 +210,7 @@ public class AppointmentsController {
     // Add New Appointment
     public PageReference saveNewAppointment() {
         insert NewAppointment;
+        this.NewAppointment = new Appointment__c();
         return null;
     }
 
