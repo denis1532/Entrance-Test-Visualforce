@@ -105,7 +105,7 @@
             <apex:pageBlockTable value="{! appointments }" var="appointment" columnsWidth="6%, 22%, 22%, 22%, 22%, 6%" >
                 <!-- Action column -->
                 <apex:column headerValue="Action" >
-                    <apex:outputLink value="/{!appointment.Id}">View</apex:outputLink>
+                    <apex:outputLink value="/{!appointment.Id}" >View</apex:outputLink>
                 </apex:column>
 
                 <!-- Doctor's Name column -->

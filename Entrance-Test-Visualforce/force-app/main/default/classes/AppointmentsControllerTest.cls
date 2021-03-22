@@ -33,11 +33,12 @@ private class AppointmentsControllerTest {
     private static String doctorsAssertion = 'SELECT Id FROM Doctor__c';
     private static String patientsAssertion = 'SELECT Id FROM Doctor__c';
     private static String appointmentsAssertion = 'SELECT Id FROM Appointment__c';
-    
-    
-    
+
+
+
     /*** ---------- Test custom controller ---------- ***/
-    static testmethod void testAppointmentsController() {
+    @isTest
+    static void testAppointmentsController() {
         AppointmentsController TestAppointmentsController = new AppointmentsController();
 
         /*** New doctor ***/
