@@ -41,6 +41,9 @@ public class AppointmentsController {
     // Add New Appointment
     public Appointment__c NewAppointment {get;set;}
 
+    // For delete buttons
+    public String selectedAppointmentId {get;set;}
+
     /*** ---------- Init ---------- ***/
     public AppointmentsController() {
         // Initialization properties
@@ -153,6 +156,8 @@ public class AppointmentsController {
             				 durationQuery;
         this.totalSize = Database.countQuery(totalRecordsNumber);
 
+        system.debug('@@@ Total query: ' + query);
+
         return results;
     }
 
@@ -160,9 +165,13 @@ public class AppointmentsController {
     public List<Doctor__c> getHours() {
         if (selectedDoctorId == null) {
             this.workingHoursQuery = '';
-
+            /* List<Doctor__c> hours = new List<Doctor__c>();
+             *
+             * tried making fields' labels visible, but without its' values (failed :( )
+             * if null, then it this section isn't displayed at all
+             */
             return null;
-        } else {
+        } else { // It isn't neccessary to write "else" here, but to make code more readable, I'd like to leave it as is
             this.workingHours = 'WHERE Doctor__c.Id = ' + '\'' + selectedDoctorId + '\'';
         }
 
@@ -195,6 +204,25 @@ public class AppointmentsController {
         }
         catch (Exception e) {
             ApexPages.addMessages(e);
+        }
+        return null;
+    }
+
+    /*** ---------- Delete buttons ---------- ***/
+
+    // Delete selected contact
+    public PageReference deleteSelectedAppointment() {
+        if (selectedAppointmentId == '') {
+            this.selectedAppointmentId = System.currentPageReference().getParameters().get('AppointmentId');
+            // Select contact for delete
+        }
+
+        List<Appointment__c> appointmentDelete = [SELECT Id
+                                                  FROM Appointment__c
+                                                  WHERE Id = :selectedAppointmentId
+                                                  LIMIT 1];
+        if (appointmentDelete.size() > 0) {
+            delete appointmentDelete[0];
         }
         return null;
     }

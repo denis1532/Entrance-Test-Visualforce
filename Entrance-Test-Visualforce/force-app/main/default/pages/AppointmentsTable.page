@@ -21,9 +21,9 @@
             margin: 0;
         }
     </style>
-    
+
     <apex:pageMessages id="error_messages" />
-    
+
     <apex:form >
     	<apex:pageBlock id="appointments_list" title="Appointments table" >
             <!-- Pagination buttons -->
@@ -41,7 +41,7 @@
             <apex:pageBlockSection columns="2" >
             	<apex:selectList id="option" value="{! selectedDoctorId }" label="Select a doctor" size="1" multiselect="false" >
                     <apex:selectOptions value="{! selectedDoctor }" />
-                    
+
                     <apex:actionSupport event="onchange" reRender="appointments_list, error_messages" />
                 </apex:selectList>
 
@@ -51,7 +51,7 @@
             <!-- Add New Doctor button -->
             <apex:pageBlockSection columns="1" >
             	<apex:commandButton action="{! URLFOR($Action.Doctor__c.New) }" reRender="appointments_list" value="Add New Doctor" />
-                
+
             	<apex:actionSupport event="onchange" reRender="appointments_list, error_messages" />
             </apex:pageBlockSection>
 
@@ -102,7 +102,7 @@
             </apex:pageBlockSection>
 
             <!-- Table -->
-            <apex:pageBlockTable value="{! appointments }" var="appointment" columnsWidth="12%, 22%, 22%, 22%, 22%" >
+            <apex:pageBlockTable value="{! appointments }" var="appointment" columnsWidth="6%, 22%, 22%, 22%, 22%, 6%" >
                 <!-- Action column -->
                 <apex:column headerValue="Action" >
                     <apex:outputLink value="/{!appointment.Id}">View</apex:outputLink>
@@ -142,6 +142,13 @@
                             <apex:param value="Duration_in_minutes__c" assignTo="{! sortOrder }" ></apex:param>
                         </apex:commandLink>
                     </apex:facet>
+                </apex:column>
+
+                <!-- Delete buttons column -->
+                <apex:column >
+                    <apex:commandButton Id="btnDelete" action="{! deleteSelectedAppointment }" reRender="appointments_list, error_messages" title="Delete" value="Delete">
+                        <apex:param name="AppointmentId" value="{! appointment.Id }" assignTo="{! selectedAppointmentId }" />
+                    </apex:commandButton>
                 </apex:column>
             </apex:pageBlockTable>
         </apex:pageBlock>
