@@ -45,7 +45,7 @@
                     <apex:actionSupport event="onchange" reRender="appointments_list, error_messages" />
                 </apex:selectList>
 
-                <apex:commandButton action="{! resetSearchAppointmentsByDoctor }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
+                <apex:commandButton action="{! resetSearchAppointmentsByDoctor }" reRender="appointments_list, error_messages" status="status" title="Clear" value="Clear" />
             </apex:pageBlockSection>
 
             <!-- Add New Doctor button -->
