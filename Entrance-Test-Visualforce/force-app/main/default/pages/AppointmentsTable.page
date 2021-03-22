@@ -21,7 +21,9 @@
             margin: 0;
         }
     </style>
-
+    
+    <apex:pageMessages id="error_messages" />
+    
     <apex:form >
     	<apex:pageBlock id="appointments_list" title="Appointments table" >
             <!-- Pagination buttons -->
@@ -39,7 +41,8 @@
             <apex:pageBlockSection columns="2" >
             	<apex:selectList id="option" value="{! selectedDoctorId }" label="Select a doctor" size="1" multiselect="false" >
                     <apex:selectOptions value="{! selectedDoctor }" />
-                    <apex:actionSupport event="onchange" reRender="appointments_list" />
+                    
+                    <apex:actionSupport event="onchange" reRender="appointments_list, error_messages" />
                 </apex:selectList>
 
                 <apex:commandButton action="{! resetSearchAppointmentsByDoctor }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
@@ -48,7 +51,8 @@
             <!-- Add New Doctor button -->
             <apex:pageBlockSection columns="1" >
             	<apex:commandButton action="{! URLFOR($Action.Doctor__c.New) }" reRender="appointments_list" value="Add New Doctor" />
-            	<apex:actionSupport event="onchange" reRender="appointments_list" />
+                
+            	<apex:actionSupport event="onchange" reRender="appointments_list, error_messages" />
             </apex:pageBlockSection>
 
             <!-- Working Hours section -->
@@ -63,42 +67,38 @@
             <apex:pageBlockSection columns="2" >
             	<apex:selectList id="option" value="{! selectedPatientId }" label="Select a patient" size="1" multiselect="false" >
                     <apex:selectOptions value="{! selectedPatient }" />
-                    <apex:actionSupport event="onchange" reRender="appointments_list" />
+                    <apex:actionSupport event="onchange" reRender="appointments_list, error_messages" />
                 </apex:selectList>
 
-                <apex:commandButton action="{! resetSearchAppointmentsByPatient }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
+                <apex:commandButton action="{! resetSearchAppointmentsByPatient }" reRender="appointments_list, error_messages" status="status" title="Clear" value="Clear" />
             </apex:pageBlockSection>
 
             <!-- Add New Patient button -->
             <apex:pageBlockSection columns="1" >
-            	<apex:commandButton action="{! URLFOR($Action.Patient__c.New) }" reRender="appointments_list" value="Add New Patient" />
+            	<apex:commandButton action="{! URLFOR($Action.Patient__c.New) }" reRender="appointments_list, error_messages" value="Add New Patient" />
             </apex:pageBlockSection>
 
             <!-- Date section -->
             <apex:pageBlockSection columns="2" >
                 <apex:input type="datetime-local" value="{! searchDateTime }" label="Appointment Date" >
-                	<apex:actionSupport event="onchange" reRender="appointments_list" />
+                	<apex:actionSupport event="onchange" reRender="appointments_list, error_messages" />
                 </apex:input>
 
-                <apex:panelGroup >
-                	<apex:commandButton action="{! resetSearchAppointmentByDate }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
-                </apex:panelGroup>
+                <apex:commandButton action="{! resetSearchAppointmentByDate }" reRender="appointments_list, error_messages" status="status" title="Clear" value="Clear" />
             </apex:pageBlockSection>
 
             <!-- Duration section -->
             <apex:pageBlockSection columns="2" >
                 <apex:input html-min="0" html-placeholder="Type amount of minutes" type="number" value="{! searchDuration }" label="Duration in minutes" >
-                	<apex:actionSupport event="onchange" reRender="appointments_list" />
+                	<apex:actionSupport event="onchange" reRender="appointments_list, error_messages" />
                 </apex:input>
 
-                <apex:panelGroup >
-                    <apex:commandButton action="{! resetSearchAppointmentByDuration }" reRender="appointments_list" status="status" title="Clear" value="Clear" />
-                </apex:panelGroup>
+                <apex:commandButton action="{! resetSearchAppointmentByDuration }" reRender="appointments_list, error_messages" status="status" title="Clear" value="Clear" />
             </apex:pageBlockSection>
 
             <!-- Add New Appointment button -->
             <apex:pageBlockSection columns="1" >
-                <apex:commandButton action="{! saveNewAppointment }" value="Add New Appointment" />
+                <apex:commandButton action="{! saveNewAppointment }" value="Add New Appointment" reRender="appointments_list, error_messages" />
             </apex:pageBlockSection>
 
             <!-- Table -->

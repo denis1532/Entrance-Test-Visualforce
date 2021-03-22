@@ -83,9 +83,6 @@ public class AppointmentsController {
             this.NewAppointment.Doctor__c = null;
             this.NewAppointment.Patient__c = null;
 
-            system.debug(NewAppointment.Doctor__c);
-            system.debug(NewAppointment.Patient__c);
-
             this.doctorsAndPatientsQuery = '';
             this.workingHoursQuery = '';
             this.dateQuery = '';
@@ -93,9 +90,6 @@ public class AppointmentsController {
         } else {
             this.NewAppointment.Doctor__c = selectedDoctorId;
             this.NewAppointment.Patient__c = selectedPatientId;
-
-            system.debug(NewAppointment.Doctor__c);
-            system.debug(NewAppointment.Patient__c);
 
             this.doctorsAndPatientsQuery = 'WHERE (' +
                 (selectedDoctorId != null ? 'Doctor__r.Id = ' + '\'' + selectedDoctorId + '\'' : '') +
@@ -108,13 +102,9 @@ public class AppointmentsController {
         if (searchDuration == 0 || searchDuration == null) {
             this.NewAppointment.Duration_in_minutes__c = null;
 
-            system.debug(NewAppointment.Duration_in_minutes__c);
-
             this.searchDuration = null;
         } else {
             this.NewAppointment.Duration_in_minutes__c = searchDuration;
-
-            system.debug(NewAppointment.Duration_in_minutes__c);
 
             this.durationQuery = (selectedDoctorId == null && selectedPatientId == null && searchDateTime == null
                                   ? 'WHERE (Duration_in_minutes__c = ' + searchDuration + ') '
@@ -125,8 +115,6 @@ public class AppointmentsController {
         // Setting date query
         if (searchDateTime == null) {
             this.NewAppointment.Appointment_Date__c = null;
-
-            system.debug(NewAppointment.Appointment_Date__c);
 
             this.searchDateTime = null;
         } else {
@@ -145,8 +133,6 @@ public class AppointmentsController {
                               ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                               : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                              );
-
-            system.debug(NewAppointment.Appointment_Date__c);
         }
 
         // Customizing main query
@@ -167,8 +153,6 @@ public class AppointmentsController {
             				 dateQuery +
             				 durationQuery;
         this.totalSize = Database.countQuery(totalRecordsNumber);
-
-        system.debug(NewAppointment);
 
         return results;
     }
@@ -209,8 +193,13 @@ public class AppointmentsController {
 
     // Add New Appointment
     public PageReference saveNewAppointment() {
-        insert NewAppointment;
-        this.NewAppointment = new Appointment__c();
+        try {
+            insert NewAppointment;
+            this.NewAppointment = new Appointment__c();
+        }
+        catch (Exception e) {
+            ApexPages.addMessages(e);
+        }
         return null;
     }
 
