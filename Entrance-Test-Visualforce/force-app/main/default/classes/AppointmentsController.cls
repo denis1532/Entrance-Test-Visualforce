@@ -156,8 +156,6 @@ public class AppointmentsController {
             				 durationQuery;
         this.totalSize = Database.countQuery(totalRecordsNumber);
 
-        system.debug('@@@ Total query: ' + query);
-
         return results;
     }
 
