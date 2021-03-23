@@ -146,7 +146,7 @@
 
                 <!-- Delete buttons column -->
                 <apex:column >
-                    <apex:commandButton Id="btnDelete" action="{! deleteSelectedAppointment }" reRender="appointments_list, error_messages" title="Delete" value="Delete">
+                    <apex:commandButton Id="btnDelete" action="{! deleteSelectedAppointment }" reRender="appointments_list, error_messages" title="Delete" value="Delete" status="LoadingStatus" onclick="if(!confirm('Are you sure?')){return false};" >
                         <apex:param name="AppointmentId" value="{! appointment.Id }" assignTo="{! selectedAppointmentId }" />
                     </apex:commandButton>
                 </apex:column>

@@ -27,7 +27,7 @@ public class TestDataFactory {
 
         return TestAppointment;
     }
-    
+
     public static String doctorsAssertion = 'SELECT Id FROM Doctor__c';
     public static String patientsAssertion = 'SELECT Id FROM Doctor__c';
     public static String appointmentsAssertion = 'SELECT Id FROM Appointment__c';
