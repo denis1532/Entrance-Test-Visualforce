@@ -1,6 +1,6 @@
 public with sharing class AppointmentCreationTriggerHandler {
 
-    public void OnBeforeInsertCheck (List<Appointment__c> record) {
+    public static void OnBeforeInsertCheck (List<Appointment__c> record) {
         Set<Id> docIds = new Set<Id>();
         Map<Id, Datetime> newDateMap = new Map<Id, Datetime>();
         Map<Id, Integer> newDurationMap = new Map<Id, Integer>();
