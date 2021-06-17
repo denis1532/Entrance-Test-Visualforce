@@ -15,6 +15,7 @@
     <tabs>Doctor__c</tabs>
     <tabs>Patient__c</tabs>
     <tabs>Appointments</tabs>
+    <tabs>Appointments_Aura</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Medical_Center_UtilityBar</utilityBar>
 </CustomApplication>

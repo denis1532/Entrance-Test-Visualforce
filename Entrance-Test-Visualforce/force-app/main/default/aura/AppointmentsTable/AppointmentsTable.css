@@ -1,0 +1,27 @@
+/*.THIS .doctors_selector .patients_selector .datetime_selector {
+    padding: 0 1rem 1rem 1rem; // !!! так почему-то не работает
+}*/
+/*
+.THIS .doctors_selector {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.THIS .patients_selector {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.THIS .datetime_selector {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.THIS .duration_input {
+    padding: 0 1rem 1rem 1rem;
+}*/
+
+.THIS .slds-col {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.THIS .records_number_selector {
+    padding: 0 1rem 1rem 1 rem;
+}

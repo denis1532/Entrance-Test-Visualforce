@@ -13,6 +13,10 @@
 		<name>ApexTrigger</name>
 	</types>
 	<types>
+		<members>AppointmentsTable</members>
+		<name>AuraDefinitionBundle</name>
+	</types>
+	<types>
 		<members>Medical_Center</members>
 		<name>CustomApplication</name>
 	</types>
@@ -35,5 +39,5 @@
 		<members>*</members>
 		<name>CustomTab</name>
 	</types>
-	<version>50.0</version>
+	<version>51.0</version>
 </Package>
