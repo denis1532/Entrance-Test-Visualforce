@@ -22,6 +22,8 @@
     <aura:attribute name="totalRecords" type="Integer" default="0" />
     <aura:attribute name="recordStart" type="Integer" default="0" />
     <aura:attribute name="recordEnd" type="Integer" default="0" />
+    <aura:attribute name="pageSize" type="List" />
+    <aura:attribute name="selectedPageSize" type="String" default="10" />
 
     <aura:handler name="init" value="{! this }" action="{! c.init }" />
     <aura:handler event="aura:waiting" action="{! c.showWaiting }" ></aura:handler>
@@ -145,14 +147,12 @@
         </lightning:layout>
 
         <lightning:layout>
-                <div class="records_number_selector slds-float_right" >
-                    <ui:inputSelect aura:id="pageSize" label="Display Records Per Page: " change="{! c.onPagesizeChange }" >
-                        <ui:inputSelectOption text="10" label="10" value="true" />
-                        <ui:inputSelectOption text="15" label="15" />
-                        <ui:inputSelectOption text="20" label="20" />
-                    </ui:inputSelect>
-                    <br/>
-                </div>
+            <lightning:combobox class="records_number_selector"
+                                label="Display Records Per Page:"
+                                aura:id="pageSize"
+                                value="{! v.selectedPageSize }"
+                                options="{! v.pageSize }"
+                                onchange="{! c.onPagesizeChange }" />
         </lightning:layout>
 
         <lightning:datatable keyField="id"

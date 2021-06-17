@@ -135,6 +135,16 @@
         // 2. КОНВЕРТИРОВАТЬ СРАЗУ В НОРМАЛЬНЫЙ ISO (ЗАГУГЛИТЬ)
     },
 
+    setPagesize : function (cmp) {
+        var sizes = [
+            { "label": "10", "value": "10" },
+            { "label": "15", "value": "15" },
+            { "label": "20", "value": "20" },
+        ];
+
+        cmp.set("v.pageSize", sizes);
+    },
+
     updateData : function(cmp) {
         var doctorId = cmp.find('doctorId').get('v.value');
         var patientId = cmp.find('patientId').get('v.value');

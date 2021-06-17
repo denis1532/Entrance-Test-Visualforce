@@ -31,6 +31,7 @@
         helper.getPatients(cmp);
         helper.getData(cmp);
         helper.getToday(cmp);
+        helper.setPagesize(cmp);
     },
 
     /*getSelectedRow : function (cmp, event, helper) {
