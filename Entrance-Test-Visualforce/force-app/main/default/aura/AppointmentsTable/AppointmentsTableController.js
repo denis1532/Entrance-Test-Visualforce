@@ -1,5 +1,7 @@
 ({
     init : function (cmp, event, helper) {
+        var timezone = $A.get("$Locale.timezone");
+
         cmp.set('v.columns', [
             { label: 'Action', fieldName: 'viewLink', type: 'url', typeAttributes: {
                 label: 'View',
@@ -16,7 +18,7 @@
                 minute: '2-digit',
                 hour12: true,
                 timeZoneName: 'short',
-                timeZone: 'UTC' }
+                timeZone: timezone }
             }, // FIX DATETIME DIFFERENCES
             { label: 'Duration', fieldName: 'Duration_in_minutes__c', type: 'number' },
             { type: 'button', typeAttributes: {
@@ -32,6 +34,10 @@
         helper.getData(cmp);
         helper.getToday(cmp);
         helper.setPagesize(cmp);
+
+        /* console.log('Time Zone Preference in Salesforce ORG :'+timezone);
+        var mydate = new Date().toLocaleString("en-US", {timeZone: timezone})
+        console.log('Date Instance with Salesforce Locale timezone : '+mydate); */
     },
 
     /*getSelectedRow : function (cmp, event, helper) {
@@ -79,6 +85,10 @@
 
     clearPatientSelect : function (cmp, event, helper) {
         helper.patientSelectCleared (cmp, event);
+    },
+
+    clearAppointmentDate : function (cmp, event, helper) {
+        helper.appointmentDateCleared(cmp, event);
     },
 
     clearDuration : function (cmp, event, helper) {

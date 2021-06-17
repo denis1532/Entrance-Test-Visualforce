@@ -14,7 +14,7 @@
     <aura:attribute name="patients" type="List" access="PRIVATE" />
     <aura:attribute name="selectedPatient" default="" type="String" access="PRIVATE" />
 
-    <aura:attribute name="datetime" type="Datetime" access="PRIVATE" />
+    <aura:attribute name="datetime" type="Datetime" default="" access="PRIVATE" />
     <aura:attribute name="duration" type="Double" access="PRIVATE" />
 
     <aura:attribute name="pageNumber" type="Integer" default="1" />
@@ -106,10 +106,9 @@
             <lightning:layoutItem class="slds-col slds-size_5-of-12" >
                 <lightning:input class="datetime_selector"
                                  type="datetime"
-                                 name="datetime"
                                  aura:id="appointmentDate"
                                  label="Pick a date and time"
-
+                                 value="{! v.datetime }"
                                  onchange="{! c.onAppointmentDateChange }"/>
             </lightning:layoutItem>
 
@@ -117,7 +116,8 @@
                 <lightning:button label="Clear"
                                   iconName="utility:delete"
                                   iconPosition="right"
-                                  variant="brand" />
+                                  variant="brand"
+                                  onclick="{! c.clearAppointmentDate }" />
             </lightning:layoutItem>
         </lightning:layout>
 

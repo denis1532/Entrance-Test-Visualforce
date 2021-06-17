@@ -129,10 +129,7 @@
     getToday : function(cmp) {
         var today = $A.localizationService.formatDateTime(new Date(), "YYYY-MM-DD\'T\'HH:mm:ss.SSSZ");
 
-        cmp.set('v.datetime', today);
-
-        // 1. ПОЛУЧАТЬ СРАЗУ UTC-ФОРМАТ
-        // 2. КОНВЕРТИРОВАТЬ СРАЗУ В НОРМАЛЬНЫЙ ISO (ЗАГУГЛИТЬ)
+        //cmp.set('v.datetime', today);
     },
 
     setPagesize : function (cmp) {
@@ -161,23 +158,23 @@
         this.getData(cmp, doctorId, patientId, appointmentDate, duration);
     },
 
-    doctorChanged : function (cmp, event) {
+    doctorChanged : function (cmp) {
         //var doctorId = cmp.find('doctorId').get('v.value');
 
         this.updateData(cmp);
     },
 
-    patientChanged : function (cmp, event) {
+    patientChanged : function (cmp) {
         //var patientId = cmp.find('patientId').get('v.value');
 
         this.updateData(cmp);
     },
 
-    appointmentDateChanged : function (cmp, event) {
+    appointmentDateChanged : function (cmp) {
         this.updateData(cmp);
     },
 
-    durationChanged : function (cmp, event) {
+    durationChanged : function (cmp) {
         this.updateData(cmp);
     },
 
@@ -221,26 +218,31 @@
     /*var paramStr = JSON.stringify(event.getParams(), null, 4);
     console.log(paramStr);*/
 
-    showConfirmDialog : function (cmp, event, helper) {
+    showConfirmDialog : function (cmp) {
         cmp.set('v.showConfirmDialog', true);
     },
 
-    hideConfirmDialog : function (cmp, event, helper) {
+    hideConfirmDialog : function (cmp) {
         cmp.set("v.showConfirmDialog", false);
     },
 
-    confirmDialogYes : function (cmp, event, helper) {
+    confirmDialogYes : function (cmp) {
         cmp.set("v.allowedDelition", true);
         cmp.set('v.showConfirmDialog', false);
     },
 
-    doctorSelectCleared : function (cmp, event) {
+    doctorSelectCleared : function (cmp) {
         cmp.find('doctorId').set('v.value', '');
         this.updateData(cmp);
     },
 
     patientSelectCleared : function (cmp, event) {
         cmp.find('patientId').set('v.value', '');
+        this.updateData(cmp);
+    },
+
+    appointmentDateCleared : function(cmp, event) {
+        cmp.find('appointmentDate').set('v.value', '');
         this.updateData(cmp);
     },
 
