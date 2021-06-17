@@ -59,7 +59,7 @@ public class AppointmentsController {
     // Adding options to DOCTOR picklist
     public List<SelectOption> getSelectedDoctor() {
         List<SelectOption> doctors = new List<SelectOption>();
-        doctors.add(new SelectOption('','-All-'));
+        doctors.add(new SelectOption('','--All--'));
         for (Doctor__c doctor : [SELECT Id, Name FROM Doctor__c ORDER BY Name ASC]) {
             doctors.add(new SelectOption(doctor.Id, doctor.Name));
         }
@@ -70,7 +70,7 @@ public class AppointmentsController {
     // Adding options to PATIENT picklist
     public List<SelectOption> getSelectedPatient() {
         List<SelectOption> patients = new List<SelectOption>();
-        patients.add(new SelectOption('','-All-'));
+        patients.add(new SelectOption('','--All--'));
         for (Patient__c patient : [SELECT Id, Name FROM Patient__c ORDER BY Name ASC]) {
             patients.add(new SelectOption(patient.Id, patient.Name));
         }
@@ -106,20 +106,27 @@ public class AppointmentsController {
             this.searchDateTime = null;
         } else {
             this.NewAppointment.Appointment_Date__c = searchDateTime;
+            system.debug('Search: ' + searchDateTime);
 
             conversedDate = Date.newInstance(searchDateTime.year(), searchDateTime.month(), searchDateTime.day());
+            system.debug('Conversed: ' + conversedDate);
 
             lowerComparisonDate = conversedDate;
+            system.debug('Lower: ' + lowerComparisonDate);
             upperComparisonDate = conversedDate.addDays(1);
+            system.debug('Upper: ' + upperComparisonDate);
 
             // Formatting to ISO date value to enable comparison in query
             formattedLower = lowerComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
+            system.debug('Lower formatted: ' + formattedLower);
             formattedUpper = upperComparisonDate.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSSZ');
+            system.debug('Upper formatted: ' + formattedUpper);
 
             this.dateQuery = (selectedDoctorId == null && selectedPatientId == null
                               ? 'WHERE (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                               : 'AND (Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedUpper + ') '
                              );
+            system.debug('Query: ' + dateQuery);
         }
 
         // Setting duration query

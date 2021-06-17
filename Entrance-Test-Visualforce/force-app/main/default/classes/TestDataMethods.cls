@@ -1,5 +1,5 @@
 @isTest
-public class TestDataFactory {
+public class TestDataMethods {
 	public static Doctor__c CreateTestDoctor(Integer num, Time workingHoursStart, Time workingHoursEnd) {
 
         Doctor__c TestDoctor = new Doctor__c();

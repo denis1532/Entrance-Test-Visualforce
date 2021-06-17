@@ -1,75 +1,71 @@
 @isTest
 private class AppointmentsControllerTest {
 
-    /*** ---------- Test custom controller ---------- ***/
-    @isTest
-    static void testAppointmentsController() {
-        AppointmentsController TestAppointmentsController = new AppointmentsController();
-
+    @TestSetup
+    static void testData() {
         /*** New doctor ***/
         // Setting doctor's working hours
         Time newWorkingHoursStart = Time.newInstance(09, 00, 00, 000);
         Time newWorkingHoursEnd = Time.newInstance(12, 00, 00, 000);
 
-        Doctor__c NewDoctor1 = TestDataFactory.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
-        Doctor__c NewDoctor2 = TestDataFactory.CreateTestDoctor(2, newWorkingHoursStart, newWorkingHoursEnd);
+        Doctor__c NewDoctor1 = TestDataMethods.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
+        Doctor__c NewDoctor2 = TestDataMethods.CreateTestDoctor(2, newWorkingHoursStart, newWorkingHoursEnd);
         Insert NewDoctor1;
         Insert NewDoctor2;
-        System.assertEquals(2, Database.query(TestDataFactory.doctorsAssertion).size());
-
-        /*** ---------- Test doctors select options ---------- ***/
-        List<SelectOption> selectedDoctorOptions = TestAppointmentsController.getSelectedDoctor();
-        System.assertEquals(selectedDoctorOptions.get(0).getLabel(), '-All-');
-        System.assertEquals(selectedDoctorOptions.get(1).getLabel(), 'Test Doctor 1');
 
         /*** New patient ***/
-        Patient__c NewPatient1 = TestDataFactory.CreateTestPatient(1);
-        Patient__c NewPatient2 = TestDataFactory.CreateTestPatient(2);
+        Patient__c NewPatient1 = TestDataMethods.CreateTestPatient(1);
+        Patient__c NewPatient2 = TestDataMethods.CreateTestPatient(2);
         Insert NewPatient1;
         Insert NewPatient2;
-        System.assertEquals(2, Database.query(TestDataFactory.patientsAssertion).size());
-
-        /*** ---------- Test patients select options ---------- ***/
-        List<SelectOption> selectedPatientOptions = TestAppointmentsController.getSelectedPatient();
-        System.assertEquals(selectedPatientOptions.get(0).getLabel(), '-All-');
-        System.assertEquals(selectedPatientOptions.get(1).getLabel(), 'Test Patient 1');
 
         /*** New appointment1 with correct time for doctor1 and patient1 ***/
         Datetime newCorrectDatetime1 = Datetime.newInstance(2021, 02, 02, 10, 00, 00);
 
-        Appointment__c TestAppointment1 = TestDataFactory.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor1, NewPatient1);
+        Appointment__c TestAppointment1 = TestDataMethods.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor1, NewPatient1);
         insert TestAppointment1;
-        System.assertEquals(1, Database.query(TestDataFactory.appointmentsAssertion).size());
 
         /*** New appointment2 with correct time for doctor1 and patient2 ***/
         Datetime newCorrectDatetime2 = Datetime.newInstance(2021, 02, 02, 11, 00, 00);
 
-        Appointment__c TestAppointment2 = TestDataFactory.CreateTestAppointment(2, newCorrectDatetime2, 40, NewDoctor1, NewPatient2);
+        Appointment__c TestAppointment2 = TestDataMethods.CreateTestAppointment(2, newCorrectDatetime2, 40, NewDoctor1, NewPatient2);
         insert TestAppointment2;
-        System.assertEquals(2, Database.query(TestDataFactory.appointmentsAssertion).size());
 
         /*** New appointment3 with correct time for doctor2 and patient1 ***/
         Datetime newCorrectDatetime3 = Datetime.newInstance(2021, 02, 03, 10, 00, 00);
 
-        Appointment__c TestAppointment3 = TestDataFactory.CreateTestAppointment(3, newCorrectDatetime3, 15, NewDoctor2, NewPatient1);
+        Appointment__c TestAppointment3 = TestDataMethods.CreateTestAppointment(3, newCorrectDatetime3, 15, NewDoctor2, NewPatient1);
         insert TestAppointment3;
-        System.assertEquals(3, Database.query(TestDataFactory.appointmentsAssertion).size());
 
         /*** New appointment4 with correct time for doctor2 and patient2 ***/
         Datetime newCorrectDatetime4 = Datetime.newInstance(2021, 02, 03, 10, 30, 00);
 
-        Appointment__c TestAppointment4 = TestDataFactory.CreateTestAppointment(4, newCorrectDatetime4, 15, NewDoctor2, NewPatient2);
+        Appointment__c TestAppointment4 = TestDataMethods.CreateTestAppointment(4, newCorrectDatetime4, 15, NewDoctor2, NewPatient2);
         insert TestAppointment4;
-        System.assertEquals(4, Database.query(TestDataFactory.appointmentsAssertion).size());
 
         /*** New appointment5 with correct time for doctor2 and patient2 ***/
         Datetime newCorrectDatetime5 = Datetime.newInstance(2021, 02, 03, 11, 00, 00);
 
-        Appointment__c TestAppointment5 = TestDataFactory.CreateTestAppointment(5, newCorrectDatetime5, 40, NewDoctor2, NewPatient2);
+        Appointment__c TestAppointment5 = TestDataMethods.CreateTestAppointment(5, newCorrectDatetime5, 40, NewDoctor2, NewPatient2);
         insert TestAppointment5;
-        System.assertEquals(5, Database.query(TestDataFactory.appointmentsAssertion).size());
+    }
 
-        /*** ---------- Test getAppointments method ---------- ***/
+    /*** ---------- Test custom controller ---------- ***/
+    @isTest
+    static void testAppointmentsController() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
+
+        System.assertEquals(2, Database.query(TestDataMethods.doctorsAssertion).size());
+
+        System.assertEquals(2, Database.query(TestDataMethods.patientsAssertion).size());
+
+        /*** ---------- Test getting appointments ---------- ***/
+        System.assertEquals(5, Database.query(TestDataMethods.appointmentsAssertion).size());
+    }
+
+    @isTest
+    static void testGetAppointmentsMethod() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
         List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
 
         System.assertEquals(5, TestAppointmentsList.size());
@@ -78,25 +74,53 @@ private class AppointmentsControllerTest {
         TestAppointmentsController.sortByField();
         TestAppointmentsController.sortOrder = 'Patient__r.Name';
         TestAppointmentsController.sortByField();
+    }
 
-        /*** ---------- Test main queries ONE BY ONE ---------- ***/
+    @isTest
+    static void testSelectors() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
+        List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
+
+         /*** ---------- Test doctors select options ---------- ***/
+        List<SelectOption> selectedDoctorOptions = TestAppointmentsController.getSelectedDoctor();
+        System.assertEquals(selectedDoctorOptions.get(0).getLabel(), '--All--');
+        System.assertEquals(selectedDoctorOptions.get(1).getLabel(), 'Test Doctor 1');
+
+        /*** ---------- Test patients select options ---------- ***/
+        List<SelectOption> selectedPatientOptions = TestAppointmentsController.getSelectedPatient();
+        System.assertEquals(selectedPatientOptions.get(0).getLabel(), '--All--');
+        System.assertEquals(selectedPatientOptions.get(1).getLabel(), 'Test Patient 1');
+    }
+
+    @isTest
+    static void testGetHoursMethod() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
+        List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
 
         /*** ||||| Test getHours method with empty doctor ||||| ***/
         List<Doctor__c> TestHours = TestAppointmentsController.getHours();
         System.assertEquals(null, TestHours);
 
+        /*** ||||| Test getHours method with selected doctor ||||| ***/
         /*** Set doctor for search ***/
-        TestAppointmentsController.selectedDoctorId = selectedDoctorOptions.get(1).getValue();
+        TestAppointmentsController.selectedDoctorId = TestAppointmentsController.getSelectedDoctor().get(1).getValue();
         TestAppointmentsController.getSelectedDoctor();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
 
-        /*** ||||| Test getHours method with selected doctor ||||| ***/
         TestHours = TestAppointmentsController.getHours();
-        System.assertNotEquals(null, TestHours);
-        // It could be done this was either,
-        // but the previous one is more understandable in this situation
         System.assertEquals(1, TestHours.size());
+    }
+
+    @isTest
+    static void testResetButtons() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
+        List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
+
+        /*** Set doctor for search ***/
+        TestAppointmentsController.selectedDoctorId = TestAppointmentsController.getSelectedDoctor().get(2).getValue();
+        TestAppointmentsList = TestAppointmentsController.getAppointments();
+        System.assertEquals(3, TestAppointmentsList.size());
 
         // Reset doctors picklist
         TestAppointmentsController.resetSearchAppointmentsByDoctor();
@@ -104,8 +128,7 @@ private class AppointmentsControllerTest {
         System.assertEquals(5, TestAppointmentsList.size());
 
         /*** Set patient for search ***/
-        TestAppointmentsController.selectedPatientId = selectedPatientOptions.get(1).getValue();
-        TestAppointmentsController.getSelectedPatient();
+        TestAppointmentsController.selectedPatientId = TestAppointmentsController.getSelectedPatient().get(1).getValue();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
 
@@ -115,10 +138,7 @@ private class AppointmentsControllerTest {
         System.assertEquals(5, TestAppointmentsList.size());
 
         /*** Set date for search ***/
-        // Format existing test datetime to date format for search
-        // *** Date formattedTestDate1 = date.newInstance(newCorrectDatetime1.year(), newCorrectDatetime1.month(), newCorrectDatetime1.day());
-
-        TestAppointmentsController.searchDateTime = newCorrectDatetime1;
+        TestAppointmentsController.searchDateTime = Datetime.newInstance(2021, 02, 02, 10, 00, 00);
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
 
@@ -136,25 +156,26 @@ private class AppointmentsControllerTest {
         TestAppointmentsController.resetSearchAppointmentByDuration();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(5, TestAppointmentsList.size());
+    }
+
+    @isTest
+    static void testTotalQuery() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
+        List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
 
         /*** ---------- Test main queries IN TOTAL ---------- ***/
         /*** Set doctor for search ***/
-        TestAppointmentsController.selectedDoctorId = selectedDoctorOptions.get(2).getValue();
-        TestAppointmentsController.getSelectedDoctor();
+        TestAppointmentsController.selectedDoctorId = TestAppointmentsController.getSelectedDoctor().get(2).getValue();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(3, TestAppointmentsList.size());
 
         /*** Set patient for search ***/
-        TestAppointmentsController.selectedPatientId = selectedPatientOptions.get(2).getValue();
-        TestAppointmentsController.getSelectedPatient();
+        TestAppointmentsController.selectedPatientId = TestAppointmentsController.getSelectedPatient().get(2).getValue();
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
 
         /*** Set date for search ***/
-        // Format existing test datetime to date format for search
-        // *** Date formattedTestDate2 = date.newInstance(newCorrectDatetime3.year(), newCorrectDatetime3.month(), newCorrectDatetime3.day());
-
-        TestAppointmentsController.searchDateTime = newCorrectDatetime3;
+        TestAppointmentsController.searchDateTime = Datetime.newInstance(2021, 02, 03, 10, 00, 00);
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(2, TestAppointmentsList.size());
 
@@ -162,28 +183,12 @@ private class AppointmentsControllerTest {
         TestAppointmentsController.searchDuration = 40;
         TestAppointmentsList = TestAppointmentsController.getAppointments();
         System.assertEquals(1, TestAppointmentsList.size());
+    }
 
-        // Reset doctors picklist
-        TestAppointmentsController.resetSearchAppointmentsByDoctor();
-        TestAppointmentsList = TestAppointmentsController.getAppointments();
-        System.assertEquals(1, TestAppointmentsList.size());
-
-        // Reset patients picklist
-        TestAppointmentsController.resetSearchAppointmentsByPatient();
-        TestAppointmentsList = TestAppointmentsController.getAppointments();
-        System.assertEquals(1, TestAppointmentsList.size());
-
-        // Reset date search
-        TestAppointmentsController.resetSearchAppointmentByDate();
-        TestAppointmentsList = TestAppointmentsController.getAppointments();
-        System.assertEquals(2, TestAppointmentsList.size());
-
-        // Reset duration search
-        TestAppointmentsController.resetSearchAppointmentByDuration();
-        TestAppointmentsList = TestAppointmentsController.getAppointments();
-        System.assertEquals(5, TestAppointmentsList.size());
-
-        /*** ---------- Test pagination ---------- ***/
+    @isTest
+    static void testPagination() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
+        List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
 
         // Test Beginning method
         TestAppointmentsController.Beginning();
@@ -220,24 +225,24 @@ private class AppointmentsControllerTest {
         Time newWorkingHoursStartLoop = Time.newInstance(01, 00, 00, 000);
         Time newWorkingHoursEndLoop = Time.newInstance(23, 00, 00, 000);
 
-        Doctor__c NewDoctorForLoop = TestDataFactory.CreateTestDoctor(3, newWorkingHoursStartLoop, newWorkingHoursEndLoop);
+        Doctor__c NewDoctorForLoop = TestDataMethods.CreateTestDoctor(3, newWorkingHoursStartLoop, newWorkingHoursEndLoop);
         insert NewDoctorForLoop;
-        System.assertEquals(3, Database.query(TestDataFactory.doctorsAssertion).size());
+        System.assertEquals(3, Database.query(TestDataMethods.doctorsAssertion).size());
 
         /*** New Patient for loop ***/
-        Patient__c NewPatientForLoop = TestDataFactory.CreateTestPatient(3);
+        Patient__c NewPatientForLoop = TestDataMethods.CreateTestPatient(3);
         insert NewPatientForLoop;
-        System.assertEquals(3, Database.query(TestDataFactory.patientsAssertion).size());
+        System.assertEquals(3, Database.query(TestDataMethods.patientsAssertion).size());
 
         // Create additional appointments to fulfill else method conditionals
         for (Integer i = 0; i < 5; i++) {
             Datetime newCorrectDatetimeLoop = Datetime.newInstance(2021, 02, 02, 01, 00+i*2, 00);
-            Appointment__c TestAppointmentLoop = TestDataFactory.CreateTestAppointment(i, newCorrectDatetimeLoop, 1, NewDoctorForLoop, NewPatientForLoop);
+            Appointment__c TestAppointmentLoop = TestDataMethods.CreateTestAppointment(i, newCorrectDatetimeLoop, 1, NewDoctorForLoop, NewPatientForLoop);
             insert TestAppointmentLoop;
         }
 
         TestAppointmentsList = TestAppointmentsController.getAppointments();
-        System.assertEquals(10, Database.query(TestDataFactory.appointmentsAssertion).size());
+        System.assertEquals(10, Database.query(TestDataMethods.appointmentsAssertion).size());
 
         System.assertEquals(1, TestAppointmentsController.getTotalPages());
     }
