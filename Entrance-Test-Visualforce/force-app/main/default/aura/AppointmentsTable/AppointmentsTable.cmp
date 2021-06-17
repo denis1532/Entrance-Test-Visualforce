@@ -1,32 +1,32 @@
 <aura:component implements="force:appHostable"
                 access="global"
                 controller="AppointmentsControllerAura" >
-    
+
     <aura:attribute name="data" type="Object" />
     <aura:attribute name="columns" type="List" />
     <aura:attribute name="showConfirmDialog" type="Boolean" default="false" />
     <aura:attribute name="allowedDeletion" type="Boolean" default="false" />
     <!-- <aura:attribute name="selectedRow" type="Object" /> -->
-    
+
     <aura:attribute name="doctors" type="List" access="PRIVATE" />
-    <aura:attribute name="selectedDoctor" type="String" access="PRIVATE" />
-    
+    <aura:attribute name="selectedDoctor" default="" type="String" access="PRIVATE" />
+
     <aura:attribute name="patients" type="List" access="PRIVATE" />
-    <aura:attribute name="selectedPatient" type="String" access="PRIVATE" />
-    
+    <aura:attribute name="selectedPatient" default="" type="String" access="PRIVATE" />
+
     <aura:attribute name="datetime" type="Datetime" access="PRIVATE" />
     <aura:attribute name="duration" type="Double" access="PRIVATE" />
-    
+
     <aura:attribute name="pageNumber" type="Integer" default="1" />
     <aura:attribute name="totalPages" type="Integer" default="0" />
     <aura:attribute name="totalRecords" type="Integer" default="0" />
     <aura:attribute name="recordStart" type="Integer" default="0" />
     <aura:attribute name="recordEnd" type="Integer" default="0" />
-    
+
     <aura:handler name="init" value="{! this }" action="{! c.init }" />
     <aura:handler event="aura:waiting" action="{! c.showWaiting }" ></aura:handler>
     <aura:handler event="aura:doneWaiting" action="{! c.hideWaiting }" ></aura:handler>
-    
+
     <aura:if isTrue="{! v.showConfirmDialog }">
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
             <div class="slds-modal__container">
@@ -41,42 +41,37 @@
                                         size="small" ></lightning:icon>
                         <span class="slds-assistive-text">Close</span>
                     </button>
-                    
+
                     <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Confirm Deletion</h2>
                     <p class="slds-m-top_x-small">Here’s a tagline if you need it. It is allowed to extend across mulitple lines, so I’m making up content to show that to you. It is allowed to
                         <a href="#">contain links or be a link</a>.</p>
                 </header>
-                
+
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
                     <center>Are you sure you want to delete this record?</center>
                 </div>
-                
+
                 <footer class="slds-modal__footer">
                     <button class="slds-button slds-button_neutral" onclick="{! c.handleHideDialog }" >No</button>
                     <button class="slds-button slds-button_text-destructive" onclick="{! c.handleConfirmDialogYes }" >Yes</button>
                 </footer>
             </div>
         </section>
-        
-        <div class="slds-backdrop slds-backdrop_open"></div>            
+
+        <div class="slds-backdrop slds-backdrop_open"></div>
     </aura:if>
-    
+
     <lightning:card title="Appointments" iconName="standard:shift_type" >
         <lightning:layout verticalAlign="end" class="slds-grid slds-wrap" >
             <lightning:layoutItem class="slds-col slds-size_5-of-12" >
-                <lightning:select class="doctors_selector"
-                                  label="Select a doctor:"
-                                  aura:id="doctorId"
-                                  value="{! v.selectedDoctor }"
-                                  onchange="{! c.onDoctorChange }" >
-                    <option value="" selected="true" >Choose Doctor...</option>
-                    
-                    <aura:iteration items="{! v.doctors }" var="doctor">
-                        <option text="{! doctor.Name }" value="{! doctor.Id }" />
-                    </aura:iteration>
-                </lightning:select>
+                <lightning:combobox class="doctors_selector"
+                                    label="Select a doctor:"
+                                    aura:id="doctorId"
+                                    value="{! v.selectedDoctor }"
+                                    options="{! v.doctors }"
+                                    onchange="{! c.onDoctorChange }" />
             </lightning:layoutItem>
-            
+
             <lightning:layoutItem class="slds-col slds-size_7-of-12" >
                 <lightning:button label="Clear"
                                   iconName="utility:delete"
@@ -85,22 +80,17 @@
                                   onclick="{! c.clearDoctorSelect }" />
             </lightning:layoutItem>
         </lightning:layout>
-        
+
         <lightning:layout verticalAlign="end" class="slds-grid slds-wrap" >
             <lightning:layoutItem class="slds-col slds-size_5-of-12" >
-                <lightning:select class="patients_selector"
-                                  label="Select a patient:"
-                                  aura:id="patientId"
-                                  value="{! v.selectedPatient }"
-                                  onchange="{! c.onPatientChange }" >
-                    <option value="" selected="true" >Choose Patient...</option>
-                    
-                    <aura:iteration items="{! v.patients }" var="patient">
-                        <option text="{! patient.Name }" value="{! patient.Id }" />
-                    </aura:iteration>
-                </lightning:select>
+                <lightning:combobox class="patients_selector"
+                                    label="Select a patient:"
+                                    aura:id="patientId"
+                                    value="{! v.selectedPatient }"
+                                    options="{! v.patients }"
+                                    onchange="{! c.onPatientChange }" />
             </lightning:layoutItem>
-            
+
             <lightning:layoutItem class="slds-col slds-size_7-of-12" >
                 <lightning:button label="Clear"
                                   iconName="utility:delete"
@@ -109,7 +99,7 @@
                                   onclick="{! c.clearPatientSelect }" />
             </lightning:layoutItem>
         </lightning:layout>
-        
+
         <lightning:layout verticalAlign="end" class="slds-grid slds-wrap" >
             <lightning:layoutItem class="slds-col slds-size_5-of-12" >
                 <lightning:input class="datetime_selector"
@@ -117,10 +107,10 @@
                                  name="datetime"
                                  aura:id="appointmentDate"
                                  label="Pick a date and time"
-                                 
+
                                  onchange="{! c.onAppointmentDateChange }"/>
             </lightning:layoutItem>
-            
+
             <lightning:layoutItem class="slds-col slds-size_7-of-12" >
                 <lightning:button label="Clear"
                                   iconName="utility:delete"
@@ -128,7 +118,7 @@
                                   variant="brand" />
             </lightning:layoutItem>
         </lightning:layout>
-        
+
         <lightning:layout verticalAlign="end" class="slds-grid slds-wrap" >
             <lightning:layoutItem class="slds-col slds-size_5-of-12" >
                 <lightning:input class="duration_input"
@@ -138,13 +128,13 @@
                                  placeholder="Type amount of minutes.."
                                  aura:id="duration"
                                  html-min="0"
-                                 value="{! v.duration }" 
-                                 oninput="validity.valid||(value='');" 
+                                 value="{! v.duration }"
+                                 oninput="validity.valid||(value='');"
                                  onchange="{! c.onDurationChange }"
                                  onfocus="{! c.handleFocus }"
                                  onblur="{! c.handleBlur }" />
             </lightning:layoutItem>
-                
+
             <lightning:layoutItem class="slds-col slds-size_7-of-12" >
                 <lightning:button label="Clear"
                                   iconName="utility:delete"
@@ -153,7 +143,7 @@
                                   onclick="{! c.clearDuration }" />
             </lightning:layoutItem>
         </lightning:layout>
-        
+
         <lightning:layout>
                 <div class="records_number_selector slds-float_right" >
                     <ui:inputSelect aura:id="pageSize" label="Display Records Per Page: " change="{! c.onPagesizeChange }" >
@@ -164,24 +154,24 @@
                     <br/>
                 </div>
         </lightning:layout>
-        
+
         <lightning:datatable keyField="id"
                              data="{! v.data }"
                              columns="{! v.columns }"
                              hideCheckboxColumn="true"
                              onrowaction="{! c.handleRowAction }" />
-        
+
     </lightning:card>
-    
+
     <div class="slds-clearfix">
         <div class="slds-page-header" role="banner">
-            <div class="slds-float_right">            
+            <div class="slds-float_right">
                 <lightning:button label="Prev"
                                   iconName="utility:chevronleft"
                                   iconPosition="left"
                                   onclick="{! c.handlePrev }"
                                   disabled="{! v.pageNumber == 1 }"/>
-                
+
                 <lightning:button label="Next"
                                   iconName="utility:chevronright"
                                   iconPosition="right"
@@ -191,7 +181,7 @@
             <p class="slds-page-header__title">Page {!v.pageNumber} of {!v.totalPages}| Showing records from {!((v.pageNumber-1)*v.pageSize)+' to '+((v.pageNumber-1)*v.pageSize+v.dataSize)}</p>
         </div>
     </div>
-    
+
 </aura:component>
 
 <!-- implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" -->
