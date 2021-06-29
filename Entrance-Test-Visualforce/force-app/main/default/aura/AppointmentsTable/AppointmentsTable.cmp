@@ -3,13 +3,16 @@
                 controller="AppointmentsControllerAura" >
 
     <aura:attribute name="data" type="Object" />
+    <aura:attribute name="displayData" type="Boolean" />
     <aura:attribute name="columns" type="List" />
     <aura:attribute name="showConfirmDialog" type="Boolean" default="false" />
     <aura:attribute name="allowedDeletion" type="Boolean" default="false" />
-    <!-- <aura:attribute name="selectedRow" type="Object" /> -->
 
     <aura:attribute name="doctors" type="List" access="PRIVATE" />
     <aura:attribute name="selectedDoctor" default="" type="String" access="PRIVATE" />
+    <aura:attribute name="workingHoursEmpty" type="Boolean" access="PRIVATE" />
+    <aura:attribute name="workdayStart" type="String" access="PRIVATE" />
+    <aura:attribute name="workdayEnd" type="String" access="PRIVATE" />
 
     <aura:attribute name="patients" type="List" access="PRIVATE" />
     <aura:attribute name="selectedPatient" default="" type="String" access="PRIVATE" />
@@ -24,10 +27,13 @@
     <aura:attribute name="recordEnd" type="Integer" default="0" />
     <aura:attribute name="pageSize" type="List" />
     <aura:attribute name="selectedPageSize" type="String" default="10" />
+    <aura:attribute name="dataSize" type="Integer" default="0" />
+
+    <aura:attribute name="today" type="Datetime" />
 
     <aura:handler name="init" value="{! this }" action="{! c.init }" />
-    <aura:handler event="aura:waiting" action="{! c.showWaiting }" ></aura:handler>
-    <aura:handler event="aura:doneWaiting" action="{! c.hideWaiting }" ></aura:handler>
+    <aura:handler event="aura:waiting" action="{! c.showWaiting }" />
+    <aura:handler event="aura:doneWaiting" action="{! c.hideWaiting }" />
 
     <aura:if isTrue="{! v.showConfirmDialog }">
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -45,7 +51,7 @@
                     </button>
 
                     <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Confirm Deletion</h2>
-                    <p class="slds-m-top_x-small">Here’s a tagline if you need it. It is allowed to extend across mulitple lines, so I’m making up content to show that to you. It is allowed to
+                    <p class="slds-m-top_x-small">Here’s a tagline if you need it. It is allowed to extend across multiple lines, so I’m making up content to show that to you. It is allowed to
                         <a href="#">contain links or be a link</a>.</p>
                 </header>
 
@@ -67,7 +73,7 @@
         <lightning:layout verticalAlign="end" class="slds-grid slds-wrap" >
             <lightning:layoutItem class="slds-col slds-size_5-of-12" >
                 <lightning:combobox class="doctors_selector"
-                                    label="Select a doctor:"
+                                    label="Select a Doctor:"
                                     aura:id="doctorId"
                                     value="{! v.selectedDoctor }"
                                     options="{! v.doctors }"
@@ -85,8 +91,22 @@
 
         <lightning:layout verticalAlign="end" class="slds-grid slds-wrap" >
             <lightning:layoutItem class="slds-col slds-size_5-of-12" >
+                <p> Working Hours:
+                    <aura:if isTrue="{! v.workingHoursEmpty }">
+                        {!v.workdayStart} &mdash; {!v.workdayEnd}
+
+                        <aura:set attribute="else">
+                            Doctor Is Not Selected
+                        </aura:set>
+                    </aura:if>
+                </p>
+            </lightning:layoutItem>
+        </lightning:layout>
+
+        <lightning:layout verticalAlign="end" class="slds-grid slds-wrap" >
+            <lightning:layoutItem class="slds-col slds-size_5-of-12" >
                 <lightning:combobox class="patients_selector"
-                                    label="Select a patient:"
+                                    label="Select a Patient:"
                                     aura:id="patientId"
                                     value="{! v.selectedPatient }"
                                     options="{! v.patients }"
@@ -107,7 +127,7 @@
                 <lightning:input class="datetime_selector"
                                  type="datetime"
                                  aura:id="appointmentDate"
-                                 label="Pick a date and time"
+                                 label="Pick a Date and Time"
                                  value="{! v.datetime }"
                                  onchange="{! c.onAppointmentDateChange }"/>
             </lightning:layoutItem>
@@ -118,6 +138,12 @@
                                   iconPosition="right"
                                   variant="brand"
                                   onclick="{! c.clearAppointmentDate }" />
+
+                <lightning:button label="Today"
+                                  iconName="utility:date_input"
+                                  iconPosition="right"
+                                  variant="brand"
+                                  onclick="{! c.setToday }" />
             </lightning:layoutItem>
         </lightning:layout>
 
@@ -126,7 +152,7 @@
                 <lightning:input class="duration_input"
                                  type="number"
                                  name="duration"
-                                 label="Duration in minutes:"
+                                 label="Duration in Minutes:"
                                  placeholder="Type amount of minutes.."
                                  aura:id="duration"
                                  html-min="0"
@@ -146,41 +172,63 @@
             </lightning:layoutItem>
         </lightning:layout>
 
-        <lightning:layout>
-            <lightning:combobox class="records_number_selector"
-                                label="Display Records Per Page:"
-                                aura:id="pageSize"
-                                value="{! v.selectedPageSize }"
-                                options="{! v.pageSize }"
-                                onchange="{! c.onPagesizeChange }" />
+        <lightning:layout verticalAlign="end" class="slds-grid slds-grid_align-spread" >
+            <lightning:layoutItem class="slds-col" >
+                <lightning:button variant="success"
+                                  label="Add New Appointment"
+                                  title="Add New Appointment"
+                                  iconName="utility:save"
+                                  iconPosition="right"
+                                  onclick="{! c.handleSaveAppointment }"/>
+            </lightning:layoutItem>
+
+            <lightning:layoutItem class="slds-col" >
+                <lightning:combobox class="records_number_selector"
+                                    label="Display Records per Page:"
+                                    aura:id="pageSize"
+                                    value="{! v.selectedPageSize }"
+                                    options="{! v.pageSize }"
+                                    onchange="{! c.onPagesizeChange }" />
+            </lightning:layoutItem>
         </lightning:layout>
 
-        <lightning:datatable keyField="id"
-                             data="{! v.data }"
-                             columns="{! v.columns }"
-                             hideCheckboxColumn="true"
-                             onrowaction="{! c.handleRowAction }" />
+        <aura:if isTrue="{! v.displayData }">
+            <lightning:datatable keyField="id"
+                                data="{! v.data }"
+                                columns="{! v.columns }"
+                                hideCheckboxColumn="true"
+                                onrowaction="{! c.handleRowAction }" />
 
+            <aura:set attribute="else">
+                <lightning:layout>
+                    <p class="slds-p-around_medium" >
+                        <span style="font-size: 1rem; font-weight: bold; color: red" >No appointments found matching the selected criteria</span>
+                    </p>
+                </lightning:layout>
+            </aura:set>
+        </aura:if>
     </lightning:card>
 
-    <div class="slds-clearfix">
-        <div class="slds-page-header" role="banner">
-            <div class="slds-float_right">
-                <lightning:button label="Prev"
-                                  iconName="utility:chevronleft"
-                                  iconPosition="left"
-                                  onclick="{! c.handlePrev }"
-                                  disabled="{! v.pageNumber == 1 }"/>
+    <aura:if isTrue="{! v.displayData }">
+        <div class="slds-clearfix">
+            <div class="slds-page-header" role="banner">
+                <div class="slds-float_right">
+                    <lightning:button label="Prev"
+                                    iconName="utility:chevronleft"
+                                    iconPosition="left"
+                                    onclick="{! c.handlePrev }"
+                                    disabled="{! v.pageNumber == 1 }"/>
 
-                <lightning:button label="Next"
-                                  iconName="utility:chevronright"
-                                  iconPosition="right"
-                                  onclick="{! c.handleNext }"
-                                  disabled="{! v.isLastPage }" />
+                    <lightning:button label="Next"
+                                    iconName="utility:chevronright"
+                                    iconPosition="right"
+                                    onclick="{! c.handleNext }"
+                                    disabled="{! v.pageNumber == v.totalPages }" />
+                </div>
+                <p class="slds-page-header__title">Page {!v.pageNumber} of {!v.totalPages} | Showing records from {!((v.pageNumber-1)*v.selectedPageSize) + ' to ' + ((v.pageNumber-1)*v.selectedPageSize+v.dataSize)}</p>
             </div>
-            <p class="slds-page-header__title">Page {!v.pageNumber} of {!v.totalPages}| Showing records from {!((v.pageNumber-1)*v.pageSize)+' to '+((v.pageNumber-1)*v.pageSize+v.dataSize)}</p>
         </div>
-    </div>
+    </aura:if>
 
 </aura:component>
 

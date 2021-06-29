@@ -19,7 +19,7 @@
                 hour12: true,
                 timeZoneName: 'short',
                 timeZone: timezone }
-            }, // FIX DATETIME DIFFERENCES
+            },
             { label: 'Duration', fieldName: 'Duration_in_minutes__c', type: 'number' },
             { type: 'button', typeAttributes: {
                 iconName: 'utility:delete',
@@ -29,21 +29,23 @@
             }
         ]);
 
+        var sizes = [
+            { "label": "10", "value": "10" },
+            { "label": "15", "value": "15" },
+            { "label": "20", "value": "20" },
+        ];
+
+        cmp.set("v.pageSize", sizes);
+
+
         helper.getDoctors(cmp);
         helper.getPatients(cmp);
         helper.getData(cmp);
-        helper.getToday(cmp);
-        helper.setPagesize(cmp);
-
-        /* console.log('Time Zone Preference in Salesforce ORG :'+timezone);
-        var mydate = new Date().toLocaleString("en-US", {timeZone: timezone})
-        console.log('Date Instance with Salesforce Locale timezone : '+mydate); */
     },
 
-    /*getSelectedRow : function (cmp, event, helper) {
-        var selectedRow = event.getParam("selectedRow");
-        cmp.set("v.selectedRow", selectedRow);
-    },*/
+    handleSaveAppointment : function (cmp, event, helper) {
+        helper.saveNewAppointment(cmp, event, helper);
+    },
 
     handleRowAction : function (cmp, event, helper) {
         helper.deleteRecordAction(cmp, event, helper);
@@ -53,11 +55,10 @@
         helper.hideConfirmDialog(cmp, event, helper);
     },
 
-    /*handleConfirmDialogYes : function (cmp, event, helper) {
-        console.log('--- EVENT 1 ---');
-
+    handleConfirmDialogYes : function (cmp, event, helper) {
+        console.log('Clicked "Yes" on delete');
         helper.hideConfirmDialog(cmp, event, helper);
-    },*/
+    },
 
     onDoctorChange : function (cmp, event, helper) {
         helper.doctorChanged(cmp, event);
@@ -91,6 +92,10 @@
         helper.appointmentDateCleared(cmp, event);
     },
 
+    setToday : function (cmp, event, helper) {
+        helper.getToday(cmp, event);
+    },
+
     clearDuration : function (cmp, event, helper) {
         helper.durationCleared (cmp, event);
     },
@@ -98,13 +103,13 @@
     handleNext : function (cmp, event, helper) {
         var pageNumber = cmp.get("v.pageNumber");
         cmp.set("v.pageNumber", pageNumber + 1);
-        helper.getData(cmp);
+        helper.updateData(cmp);
     },
 
     handlePrev : function (cmp, event, helper) {
         var pageNumber = cmp.get("v.pageNumber");
         cmp.set("v.pageNumber", pageNumber - 1);
-        helper.getData(cmp);
+        helper.updateData(cmp);
     },
 
     showWaiting : function(cmp){
@@ -123,3 +128,18 @@
 
     }
 });
+
+
+/*
+getSelectedRow : function (cmp, event, helper) {
+    var selectedRow = event.getParam("selectedRow");
+    cmp.set("v.selectedRow", selectedRow);
+},
+*/
+
+/*
+var timezone = $A.get("$Locale.timezone");
+console.log('Time Zone Preference in Salesforce ORG :'+timezone);
+var mydate = new Date().toLocaleString("en-US", {timeZone: timezone})
+console.log('Date Instance with Salesforce Locale timezone : '+mydate);
+*/
