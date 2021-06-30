@@ -1,72 +1,4 @@
 ({
-    /* getData : function(cmp, doctorId, patientId, appointmentDate, duration, pageNumber, pageSize) {
-        var action = cmp.get('c.getAppointments');
-
-console.log('Page Number: ' + cmp.get("v.pageNumber"));
-
-        if (doctorId && typeof doctorId !== "undefined") {
-            action.setParam("selectedDoctor", doctorId);
-        }
-
-        if (patientId && typeof patientId !== "undefined") {
-            action.setParam("selectedPatient", patientId);
-        }
-
-        if (appointmentDate && typeof appointmentDate !== "undefined") {
-            action.setParam("selectedDate", appointmentDate);
-        }
-
-        if (duration && typeof duration !== "undefined") {
-            action.setParam("selectedDuration", duration);
-        }
-
-        var pageNumber = cmp.get("v.pageNumber");
-        if(pageNumber) {
-            action.setParam("pageNumber", pageNumber);
-        }
-
-        var pageSize = cmp.find("pageSize").get("v.value");
-        if(pageSize) {
-            action.setParam("pageSize", pageSize);
-        }
-
-        action.setCallback(this, $A.getCallback(function (response) {
-            var state = response.getState();
-
-            if (state === 'SUCCESS') {
-                var resultData = response.getReturnValue();
-
-                for (var i = 0; i < resultData.length; i++) {
-                    var row = resultData[i];
-
-                    row.viewLink = '/' + row.Id;
-                    row.tooltip = row.Name;
-
-                    if (row.Doctor__c) {
-                        row.DoctorName = row.Doctor__r.Name;
-                    }
-
-                    if (row.Patient__c) {
-                        row.PatientName = row.Patient__r.Name;
-                    }
-                }
-
-                cmp.set('v.data', resultData);
-
-console.log('resultData.length: ' + resultData.length);
-console.log('Page Size: ' + pageSize);
-console.log('Math.ceil: ' + Math.ceil(resultData.length / pageSize));
-
-                cmp.set("v.totalPages", Math.ceil(resultData.length / pageSize));
-            } else if (state === 'ERROR') {
-                var errors = response.getError();
-                console.error(errors);
-            }
-        }));
-
-        $A.enqueueAction(action);
-    }, */
-
     getData : function(cmp, doctorId, patientId, appointmentDate, duration) {
         var action = cmp.get('c.getAppointments');
 
@@ -228,25 +160,8 @@ console.log('Math.ceil: ' + Math.ceil(resultData.length / pageSize));
                     var unixTimeStart = workingHours[0].Working_Hours_Start__c;
                     var unixTimeEnd = workingHours[0].Working_Hours_End__c;
 
-console.log('Start UNIX: ' + unixTimeStart);
-console.log('End UNIX: ' + unixTimeEnd);
-
                     var dateStart = new Date(unixTimeStart);
                     var dateEnd = new Date(unixTimeEnd);
-
-                    /* var hourStart = dateStart.getUTCHours();
-                    var minuteStart = dateStart.getUTCMinutes();
-
-                    var hourEnd = dateEnd.getUTCHours();
-                    var minuteEnd = dateEnd.getUTCMinutes();
-
-                    var ampmStart = hourStart >= 12 ? 'PM' : 'AM';
-                    hourStart = hourStart % 12;
-                    hourStart = hourStart ? hourStart : 12;
-
-                    var ampmEnd = End >= 12 ? 'PM' : 'AM';
-                    hourEnd = hourEnd % 12;
-                    hourEnd = hourEnd ? hourEnd : 12; */
 
                     var workdayStart = this.formatAMPM(dateStart);
                     var workdayEnd = this.formatAMPM(dateEnd);
@@ -306,6 +221,12 @@ console.log('End UNIX: ' + unixTimeEnd);
         this.updateData(cmp);
     },
 
+    pagesizeChanged : function (cmp) {
+        cmp.set("v.pageNumber", 1);
+
+        this.updateData(cmp);
+    },
+
     saveNewAppointment : function (cmp, event) {
         var doctorId = cmp.find('doctorId').get('v.value');
         var patientId = cmp.find('patientId').get('v.value');
@@ -335,6 +256,16 @@ console.log('End UNIX: ' + unixTimeEnd);
                 } else if (state === "ERROR") {
                     var errors = response.getError();
                     console.error(errors);
+
+                    for(var i = 0; i < errors.length; i++) {
+                        var pageErrors = errors[i].pageErrors;
+
+                        for(var j = 0; j < pageErrors.length; j++) {
+                            var errorMessage = pageErrors[j].message;
+
+                            this.showToastError(cmp, event, errorMessage);
+                        }
+                    }
                 }
             })
             $A.enqueueAction(action);
@@ -344,43 +275,23 @@ console.log('End UNIX: ' + unixTimeEnd);
     },
 
     deleteRecordAction : function (cmp, event) {
-        //var recordId = event.getParam("row").Id;
         var actionName = event.getParam("action").name;
         var record = event.getParams().row;
 
         if (actionName === "Delete") {
+            cmp.set('v.appointmentToDelete', record);
+            cmp.set('v.appointmentIdForLink', record.Id);
+
             this.showConfirmDialog(cmp);
         }
     },
 
     deleteRecord : function (cmp, event) {
-        /* var confirmed = cmp.get("v.allowedDeletion");
-console.log(confirmed);
-
-        if(confirmed) {
-            var action = cmp.get('c.deleteAppointment');
-
-            action.setParams({
-                //appointmentToDelete: JSON.stringify(record)
-            });
-
-            action.setCallback(this, function(response) {
-                var state = response.getState();
-                if (state === "SUCCESS") {
-                    this.updateData(cmp);
-                    this.showToastSuccessfulDelete(cmp, event, record);
-                } else if (state === "ERROR") {
-                    var errors = response.getError();
-                    console.error(errors);
-                }
-            })
-            $A.enqueueAction(action);
-        } */
-
         var action = cmp.get('c.deleteAppointment');
+        var record = cmp.get('v.appointmentToDelete');
 
         action.setParams({
-            //appointmentToDelete: JSON.stringify(record)
+            appointmentToDelete: JSON.stringify(record)
         });
 
         action.setCallback(this, function(response) {
@@ -395,7 +306,23 @@ console.log(confirmed);
         })
         $A.enqueueAction(action);
 
-        cmp.set("v.allowedDelition", false);
+        cmp.set('v.appointmentToDelete', '');
+    },
+
+    showConfirmDialog : function (cmp) {
+        cmp.set('v.showConfirmDialog', true);
+    },
+
+    hideConfirmDialog : function (cmp) {
+        cmp.set("v.showConfirmDialog", false);
+
+        cmp.set('v.appointmentToDelete', '');
+    },
+
+    confirmDialogYes : function (cmp) {
+        this.deleteRecord(cmp);
+
+        cmp.set('v.showConfirmDialog', false);
     },
 
     doctorSelectCleared : function (cmp) {
@@ -404,37 +331,18 @@ console.log(confirmed);
         this.getWorkingHours(cmp);
     },
 
-    patientSelectCleared : function (cmp, event) {
+    patientSelectCleared : function (cmp) {
         cmp.find('patientId').set('v.value', '');
         this.updateData(cmp);
     },
 
-    appointmentDateCleared : function(cmp, event) {
+    appointmentDateCleared : function(cmp) {
         cmp.find('appointmentDate').set('v.value', '');
         this.updateData(cmp);
     },
 
-    durationCleared : function (cmp, event) {
+    durationCleared : function (cmp) {
         cmp.find('duration').set('v.value', '');
-        this.updateData(cmp);
-    },
-
-    showConfirmDialog : function (cmp) {
-        cmp.set('v.showConfirmDialog', true);
-    },
-
-    hideConfirmDialog : function (cmp, event) {
-        cmp.set("v.showConfirmDialog", false);
-    },
-
-    confirmDialogYes : function (cmp, event, helper) {
-        cmp.set("v.allowedDelition", true);
-        cmp.set('v.showConfirmDialog', false);
-    },
-
-    pagesizeChanged : function (cmp, event) {
-        cmp.set("v.pageNumber", 1);
-
         this.updateData(cmp);
     },
 
@@ -468,8 +376,6 @@ console.log(confirmed);
         toastEvent.fire();
     },
 
-    // Toast Event накладывается сверху на другой Toast Event только тогда,
-    // когда в их сообщении находится разный текст
     showToastSuccessfulDelete : function(cmp, event, record) {
         var toastEvent = $A.get("e.force:showToast");
         toastEvent.setParams({
@@ -483,32 +389,18 @@ console.log(confirmed);
             mode: 'pester'
         });
         toastEvent.fire();
+    },
+
+    showToastError : function(cmp, event, message) {
+        var toastEvent = $A.get("e.force:showToast");
+        toastEvent.setParams({
+            title : 'Error!',
+            message: message,
+            duration: '7000',
+            key: 'info_alt',
+            type: 'error',
+            mode: 'pester'
+        });
+        toastEvent.fire();
     }
 });
-
-/*
- * https://blog.sujeshram.com/2017/06/update-delete-record-from-datatable-listview-lightning.html
- * https://salesforce.stackexchange.com/questions/214092/how-to-delete-datatable-row-and-corresponding-record
- * https://sfdcmonkey.com/2017/08/09/add-delete-rows-dynamic/
- * https://winsurtech.com/blog/lightning-datatable-jump-issue-on-row-actions/
- * https://www.infallibletechie.com/2018/04/lightningdatatable-with-buttons-in.html
- * https://developer.salesforce.com/forums/?id=9062I000000XpZkQAK
- * https://developer.salesforce.com/forums/?id=9062I000000IFnHQAW
- * https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/controllers_server_apex_pass_data.htm
- * https://salesforce.stackexchange.com/questions/195065/not-able-to-pass-lead-id-from-lightning-helper-to-apex-controller
- * https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/expr_data_binding.htm
- */
-
-/*
-var paramStr = JSON.stringify(event.getParams(), null, 4);
-console.log(paramStr);
-*/
-
-/*
-var dt = new Date();
-var ndt = $A.localizationService.formatDateTime(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()), "YYYY-MM-DD\'T\'HH:mm:ss.SSSZ");
-var ndt2 = $A.localizationService.formatDateTime(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()+1), "YYYY-MM-DD\'T\'HH:mm:ss.SSSZ");
-console.log(dt);
-console.log(ndt);
-console.log(ndt2);
-*/

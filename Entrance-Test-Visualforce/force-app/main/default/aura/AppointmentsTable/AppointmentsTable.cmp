@@ -2,11 +2,10 @@
                 access="global"
                 controller="AppointmentsControllerAura" >
 
-    <aura:attribute name="data" type="Object" />
-    <aura:attribute name="displayData" type="Boolean" />
-    <aura:attribute name="columns" type="List" />
-    <aura:attribute name="showConfirmDialog" type="Boolean" default="false" />
-    <aura:attribute name="allowedDeletion" type="Boolean" default="false" />
+    <aura:attribute name="data" type="Object" access="PRIVATE" />
+    <aura:attribute name="displayData" type="Boolean" access="PRIVATE" />
+    <aura:attribute name="columns" type="List" access="PRIVATE" />
+    <aura:attribute name="showConfirmDialog" type="Boolean" default="false" access="PRIVATE" />
 
     <aura:attribute name="doctors" type="List" access="PRIVATE" />
     <aura:attribute name="selectedDoctor" default="" type="String" access="PRIVATE" />
@@ -20,20 +19,21 @@
     <aura:attribute name="datetime" type="Datetime" default="" access="PRIVATE" />
     <aura:attribute name="duration" type="Double" access="PRIVATE" />
 
-    <aura:attribute name="pageNumber" type="Integer" default="1" />
-    <aura:attribute name="totalPages" type="Integer" default="0" />
-    <aura:attribute name="totalRecords" type="Integer" default="0" />
-    <aura:attribute name="recordStart" type="Integer" default="0" />
-    <aura:attribute name="recordEnd" type="Integer" default="0" />
-    <aura:attribute name="pageSize" type="List" />
-    <aura:attribute name="selectedPageSize" type="String" default="10" />
-    <aura:attribute name="dataSize" type="Integer" default="0" />
+    <aura:attribute name="pageNumber" type="Integer" default="1" access="PRIVATE" />
+    <aura:attribute name="totalPages" type="Integer" default="0" access="PRIVATE" />
+    <aura:attribute name="totalRecords" type="Integer" default="0" access="PRIVATE" />
+    <aura:attribute name="recordStart" type="Integer" default="0" access="PRIVATE" />
+    <aura:attribute name="recordEnd" type="Integer" default="0" access="PRIVATE" />
+    <aura:attribute name="pageSize" type="List" access="PRIVATE" />
+    <aura:attribute name="selectedPageSize" type="String" default="10" access="PRIVATE" />
+    <aura:attribute name="dataSize" type="Integer" default="0" access="PRIVATE" />
 
-    <aura:attribute name="today" type="Datetime" />
+    <aura:attribute name="today" type="Datetime" access="PRIVATE" />
+
+    <aura:attribute name="appointmentToDelete" type="Object" access="PRIVATE" />
+    <aura:attribute name="appointmentIdForLink" type="String" access="PRIVATE" />
 
     <aura:handler name="init" value="{! this }" action="{! c.init }" />
-    <aura:handler event="aura:waiting" action="{! c.showWaiting }" />
-    <aura:handler event="aura:doneWaiting" action="{! c.hideWaiting }" />
 
     <aura:if isTrue="{! v.showConfirmDialog }">
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -51,8 +51,9 @@
                     </button>
 
                     <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Confirm Deletion</h2>
-                    <p class="slds-m-top_x-small">Here’s a tagline if you need it. It is allowed to extend across multiple lines, so I’m making up content to show that to you. It is allowed to
-                        <a href="#">contain links or be a link</a>.</p>
+                    <p class="slds-m-top_x-small">You see this window because you want to delete
+                        <a href="{! '/' + v.appointmentIdForLink }" target="_blank" >this record</a>.
+                    </p>
                 </header>
 
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
@@ -158,9 +159,7 @@
                                  html-min="0"
                                  value="{! v.duration }"
                                  oninput="validity.valid||(value='');"
-                                 onchange="{! c.onDurationChange }"
-                                 onfocus="{! c.handleFocus }"
-                                 onblur="{! c.handleBlur }" />
+                                 onchange="{! c.onDurationChange }" />
             </lightning:layoutItem>
 
             <lightning:layoutItem class="slds-col slds-size_7-of-12" >

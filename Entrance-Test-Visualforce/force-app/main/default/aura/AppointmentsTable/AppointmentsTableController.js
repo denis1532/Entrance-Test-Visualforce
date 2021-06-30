@@ -52,52 +52,52 @@
     },
 
     handleHideDialog : function (cmp, event, helper) {
-        helper.hideConfirmDialog(cmp, event, helper);
+        helper.hideConfirmDialog(cmp, helper);
     },
 
     handleConfirmDialogYes : function (cmp, event, helper) {
-        console.log('Clicked "Yes" on delete');
-        helper.hideConfirmDialog(cmp, event, helper);
+        helper.confirmDialogYes(cmp);
+        helper.hideConfirmDialog(cmp);
     },
 
     onDoctorChange : function (cmp, event, helper) {
-        helper.doctorChanged(cmp, event);
+        helper.doctorChanged(cmp);
     },
 
     onPatientChange : function (cmp, event, helper) {
-        helper.patientChanged(cmp, event);
+        helper.patientChanged(cmp);
     },
 
     onAppointmentDateChange : function (cmp, event, helper) {
-        helper.appointmentDateChanged(cmp, event);
+        helper.appointmentDateChanged(cmp);
     },
 
     onDurationChange : function (cmp, event, helper) {
-        helper.durationChanged(cmp, event);
+        helper.durationChanged(cmp);
     },
 
     onPagesizeChange : function (cmp, event, helper) {
-        helper.pagesizeChanged(cmp, event);
+        helper.pagesizeChanged(cmp);
     },
 
     clearDoctorSelect : function (cmp, event, helper) {
-        helper.doctorSelectCleared(cmp, event);
+        helper.doctorSelectCleared(cmp);
     },
 
     clearPatientSelect : function (cmp, event, helper) {
-        helper.patientSelectCleared (cmp, event);
+        helper.patientSelectCleared (cmp);
     },
 
     clearAppointmentDate : function (cmp, event, helper) {
-        helper.appointmentDateCleared(cmp, event);
+        helper.appointmentDateCleared(cmp);
     },
 
     setToday : function (cmp, event, helper) {
-        helper.getToday(cmp, event);
+        helper.getToday(cmp);
     },
 
     clearDuration : function (cmp, event, helper) {
-        helper.durationCleared (cmp, event);
+        helper.durationCleared (cmp);
     },
 
     handleNext : function (cmp, event, helper) {
@@ -111,35 +111,4 @@
         cmp.set("v.pageNumber", pageNumber - 1);
         helper.updateData(cmp);
     },
-
-    showWaiting : function(cmp){
-        //console.log('Show Waiting');
-    },
-
-    hideWaiting : function(cmp){
-        //console.log('Hide Waiting');
-    },
-
-    handleFocus : function(cmp){
-
-    },
-
-    handleBlur : function(cmp){
-
-    }
 });
-
-
-/*
-getSelectedRow : function (cmp, event, helper) {
-    var selectedRow = event.getParam("selectedRow");
-    cmp.set("v.selectedRow", selectedRow);
-},
-*/
-
-/*
-var timezone = $A.get("$Locale.timezone");
-console.log('Time Zone Preference in Salesforce ORG :'+timezone);
-var mydate = new Date().toLocaleString("en-US", {timeZone: timezone})
-console.log('Date Instance with Salesforce Locale timezone : '+mydate);
-*/

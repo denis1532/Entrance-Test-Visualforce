@@ -34,16 +34,6 @@ public class AppointmentsControllerAura {
         return patients;
     }
 
-    /* @AuraEnabled
-    public static List<Appointment__c> getAppointments(String selectedDoctor, String selectedPatient, String selectedDate, String selectedDuration, Integer pageNumber, Integer pageSize) {
-        String condition = generateConditionString(selectedDoctor, selectedPatient, selectedDate, selectedDuration);
-        String query = generateQuery(condition);
-
-        List<Appointment__c> appointments = Database.query(query);
-
-        return appointments;
-    } */
-
     @AuraEnabled
     public static AppointmentsDatatableWrapper getAppointments(String selectedDoctor, String selectedPatient, String selectedDate, String selectedDuration, Integer pageNumber, Integer pageSize) {
         String condition = generateConditionString(selectedDoctor, selectedPatient, selectedDate, selectedDuration);
@@ -175,7 +165,7 @@ System.debug('Higher (+1 day): ' + higherDatetime);
             String formattedLower = JSON.serialize(lowerDatetime).remove('"');
             String formattedHigher = JSON.serialize(higherDatetime).remove('"');
 
-            secondFilter = ' Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedHigher;
+            secondFilter = 'Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedHigher;
 
             // почему Datetime dt = (Datetime)JSON.deserialize(selectedDate, DateTime.class); возвращает 2021-01-01 00:00:00
             // а Datetime dt = (Datetime)JSON.deserialize('"' + selectedDate + '"', DateTime.class); возвращает нормальную дату и время
@@ -216,15 +206,15 @@ System.debug(secondFilter);
         }
 
         if (!String.isEmpty(firstFilter) && !String.isEmpty(secondFilter)) {
-            conditionString = firstFilter + ' AND ' + secondFilter;
+            conditionString = '(' + firstFilter + ') AND (' + secondFilter + ')';
         }
 
         if (!String.isEmpty(firstFilter) && !String.isEmpty(thirdFilter)) {
-            conditionString = firstFilter + ' AND ' + thirdFilter;
+            conditionString = '(' + firstFilter + ') AND (' + thirdFilter + ')';
         }
 
         if (!String.isEmpty(firstFilter) && !String.isEmpty(secondFilter) && !String.isEmpty(thirdFilter)) {
-            conditionString = firstFilter + ' AND ' + secondFilter + ' AND ' + thirdFilter;
+            conditionString = '(' + firstFilter + ') AND (' + secondFilter + ') AND (' + thirdFilter + ')';
         }
 
         return conditionString;
