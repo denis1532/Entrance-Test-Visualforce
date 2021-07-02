@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentAsset xmlns="http://soap.sforce.com/2006/04/metadata">
+    <isVisibleByExternalUsers>false</isVisibleByExternalUsers>
+    <language>en_US</language>
+    <masterLabel>X84711206e52e0d4ff6c793cb476ea264hea</masterLabel>
+    <relationships>
+        <organization>
+            <access>VIEWER</access>
+        </organization>
+    </relationships>
+    <versions>
+        <version>
+            <number>1</number>
+            <pathOnClient>84711206e52e0d4ff6c793cb476ea264-heartbeat-star-medical-logo-by-vexels.png</pathOnClient>
+        </version>
+    </versions>
+</ContentAsset>
