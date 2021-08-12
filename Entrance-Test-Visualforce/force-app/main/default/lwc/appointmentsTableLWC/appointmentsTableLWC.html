@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title="Appointments" icon-name="standard:shift_type">
+        <lightning-layout vertical-align="end" class="slds-grid slds-wrap">
+            <lightning-layout-item class="slds-col slds-size_5-of-12">
+                <lightning-combobox class="doctors_selector"
+                                    label="Select a Doctor:"
+                                    value={selectedDoctor}
+                                    options={doctors}>
+                </lightning-combobox>
+            </lightning-layout-item>
+
+            <lightning-layout-item class="slds-col slds-size_7-of-12">
+                <lightning-button label="Clear"
+                                  icon-name="utility:delete"
+                                  icon-position="right"
+                                  variant="brand">
+                </lightning-button>
+            </lightning-layout-item>
+        </lightning-layout>
+    </lightning-card>
+</template>
