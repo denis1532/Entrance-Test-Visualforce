@@ -5,7 +5,8 @@
                 <lightning-combobox class="doctors_selector"
                                     label="Select a Doctor:"
                                     value={selectedDoctor}
-                                    options={doctors}>
+                                    options={doctors}
+                                    onchange={onDoctorChange}>
                 </lightning-combobox>
             </lightning-layout-item>
 
@@ -13,9 +14,80 @@
                 <lightning-button label="Clear"
                                   icon-name="utility:delete"
                                   icon-position="right"
-                                  variant="brand">
+                                  variant="brand"
+                                  onclick={onDoctorClear}>
                 </lightning-button>
             </lightning-layout-item>
         </lightning-layout>
+
+        <lightning-layout vertical-align="end" class="slds-grid slds-wrap" >
+            <lightning-layout-item class="slds-col slds-size_5-of-12" >
+                <p> Working Hours:&nbsp;
+                    <template if:true={displayWorkingHours}>
+                        {workdayStart}&nbsp;&mdash;&nbsp;{workdayEnd}
+                    </template>
+
+                    <template if:false={displayWorkingHours}>
+                        Doctor Is Not Selected
+                    </template>
+                </p>
+            </lightning-layout-item>
+        </lightning-layout>
+
+        <lightning-layout vertical-align="end" class="slds-grid slds-wrap">
+            <lightning-layout-item class="slds-col slds-size_5-of-12">
+                <lightning-combobox class="doctors_selector"
+                                    label="Select a Patient:"
+                                    value={selectedPatient}
+                                    options={patients}
+                                    onchange={onPatientChange}>
+                </lightning-combobox>
+            </lightning-layout-item>
+
+            <lightning-layout-item class="slds-col slds-size_7-of-12">
+                <lightning-button label="Clear"
+                                icon-name="utility:delete"
+                                icon-position="right"
+                                variant="brand"
+                                onclick={onPatientClear}>
+                </lightning-button>
+            </lightning-layout-item>
+        </lightning-layout>
+
+        <lightning-layout vertical-align="end" class="slds-grid slds-grid_align-spread" >
+            <lightning-layout-item class="slds-col" >
+                <lightning-button variant="success"
+                                  label="Add New Appointment"
+                                  title="Add New Appointment"
+                                  icon-name="utility:save"
+                                  icon-position="right"
+                                  onclick={handleSaveAppointment}>
+                </lightning-button>
+            </lightning-layout-item>
+
+            <lightning-layout-item class="slds-col" >
+                <lightning-combobox label="Display Records per Page:"
+                                    value={selectedPagesize}
+                                    options={pageSizes}
+                                    onchange={onPagesizeChange}>
+                </lightning-combobox>
+            </lightning-layout-item>
+        </lightning-layout>
+
+        <template if:true={displayData}>
+            <lightning-datatable key-field="id"
+                                data={appointments}
+                                columns={columns}
+                                hide-checkbox-column="true"
+                                onrowaction={handleRowAction}>
+            </lightning-datatable>
+        </template>
+        <template if:false={displayData}>
+            <lightning-layout>
+                    <p class="slds-p-around_medium" >
+                        <span style="font-size: 1rem; font-weight: bold; color: red" >No appointments found matching the selected criteria</span>
+                    </p>
+                </lightning-layout>
+        </template>
     </lightning-card>
 </template>
