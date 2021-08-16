@@ -2,8 +2,7 @@
     <lightning-card title="Appointments" icon-name="standard:shift_type">
         <lightning-layout vertical-align="end" class="slds-grid slds-wrap">
             <lightning-layout-item class="slds-col slds-size_5-of-12">
-                <lightning-combobox class="doctors_selector"
-                                    label="Select a Doctor:"
+                <lightning-combobox label="Select a Doctor:"
                                     value={selectedDoctor}
                                     options={doctors}
                                     onchange={onDoctorChange}>
@@ -36,8 +35,7 @@
 
         <lightning-layout vertical-align="end" class="slds-grid slds-wrap">
             <lightning-layout-item class="slds-col slds-size_5-of-12">
-                <lightning-combobox class="doctors_selector"
-                                    label="Select a Patient:"
+                <lightning-combobox label="Select a Patient:"
                                     value={selectedPatient}
                                     options={patients}
                                     onchange={onPatientChange}>
@@ -50,6 +48,58 @@
                                 icon-position="right"
                                 variant="brand"
                                 onclick={onPatientClear}>
+                </lightning-button>
+            </lightning-layout-item>
+        </lightning-layout>
+
+        <lightning-layout vertical-align="end" class="slds-grid slds-wrap" >
+            <lightning-layout-item class="slds-col slds-size_5-of-12" >
+                <lightning-input class="datetime_input"
+                                 type="datetime"
+                                 label="Pick a Date and Time"
+                                 value={datetime}
+                                 onchange={onAppointmentDatetimeChange}>
+                </lightning-input>
+            </lightning-layout-item>
+
+            <lightning-layout-item class="slds-col slds-size_7-of-12" >
+                <lightning-button label="Clear"
+                                  icon-name="utility:delete"
+                                  icon-position="right"
+                                  variant="brand"
+                                  onclick={onAppointmentDatetimeClear}>
+                </lightning-button>
+
+                <lightning-button class="additional_button"
+                                  label="Today"
+                                  icon-name="utility:date_input"
+                                  icon-position="right"
+                                  variant="brand"
+                                  onclick={onSetToday}>
+                </lightning-button>
+            </lightning-layout-item>
+        </lightning-layout>
+
+        <lightning-layout vertical-align="end" class="slds-grid slds-wrap" >
+            <lightning-layout-item class="slds-col slds-size_5-of-12" >
+                <lightning-input class="duration_input"
+                                 type="number"
+                                 name="duration"
+                                 label="Duration in Minutes:"
+                                 placeholder="Type amount of minutes"
+                                 html-min="0"
+                                 value={duration}
+                                 onchange={onDurationChange}>
+                                 <!-- oninput="validity.valid||(value='');" -->
+                </lightning-input>
+            </lightning-layout-item>
+
+            <lightning-layout-item class="slds-col slds-size_7-of-12" >
+                <lightning-button label="Clear"
+                                  icon-name="utility:delete"
+                                  icon-position="right"
+                                  variant="brand"
+                                  onclick={onDurationClear}>
                 </lightning-button>
             </lightning-layout-item>
         </lightning-layout>
@@ -81,6 +131,26 @@
                                 hide-checkbox-column="true"
                                 onrowaction={handleRowAction}>
             </lightning-datatable>
+            <div class="slds-clearfix">
+                <div class="slds-page-header" role="banner">
+                    <div class="slds-float_right">
+                        <lightning-button label="Prev"
+                                        icon-name="utility:chevronleft"
+                                        icon-position="left"
+                                        onclick={handleClickPrev}
+                                        disabled={disabledPrevButton}>
+                        </lightning-button>
+
+                        <lightning-button label="Next"
+                                        icon-name="utility:chevronright"
+                                        icon-position="right"
+                                        onclick={handleClickNext}
+                                        disabled={disabledNextButton}>
+                        </lightning-button>
+                    </div>
+                    <p class="slds-page-header__title">Page {pageNumber} of {totalPages} | Showing records from {startingRecordNumber} to {endingRecordNumber}</p>
+                </div>
+            </div>
         </template>
         <template if:false={displayData}>
             <lightning-layout>

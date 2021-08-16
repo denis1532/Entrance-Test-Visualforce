@@ -41,24 +41,24 @@ public with sharing class AppointmentsControllerLWC {
     }
 
     @AuraEnabled(cacheable=true)
-    public static AppointmentsDatatableWrapper getAppointments(String selectedDoctor, String selectedPatient/* , String selectedDate, String selectedDuration, Integer pageNumber*/, Integer pageSize) {
-        String condition = generateConditionString(selectedDoctor, selectedPatient/* , selectedDate, selectedDuration */);
+    public static AppointmentsDatatableWrapper getAppointments(String selectedDoctor, String selectedPatient, String selectedDatetime, String selectedDuration, Integer pageNumber, Integer pageSize) {
+        String condition = generateConditionString(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration);
         String countQuery = generateCountQuery(condition);
         String query = generateQuery(condition);
 
-        /* Integer offset = (pageNumber - 1) * pageSize;
+        Integer offset = (pageNumber - 1) * pageSize;
         Integer recordEnd = pageSize * pageNumber;
-        Integer totalRecords = Database.countQuery(countQuery); */
+        Integer totalRecords = Database.countQuery(countQuery);
 
         AppointmentsDatatableWrapper appointmentWrapper =  new AppointmentsDatatableWrapper();
         appointmentWrapper.pageSize = pageSize;
-        /* appointmentWrapper.pageNumber = pageNumber;
+        appointmentWrapper.pageNumber = pageNumber;
         appointmentWrapper.recordStart = offset + 1;
         appointmentWrapper.recordEnd = totalRecords >= recordEnd ? recordEnd : totalRecords;
-        appointmentWrapper.totalRecords = totalRecords; */
+        appointmentWrapper.totalRecords = totalRecords;
 
         query += ' LIMIT ' + pageSize;
-        // query += ' OFFSET ' + offset;
+        query += ' OFFSET ' + offset;
 
 // System.debug(query);
 
@@ -76,18 +76,18 @@ public with sharing class AppointmentsControllerLWC {
         return workingHours;
     }
 
-    private static String generateConditionString(String selectedDoctor, String selectedPatient/* , String selectedDate, String selectedDuration */) {
+    private static String generateConditionString(String selectedDoctor, String selectedPatient, String selectedDatetime, String selectedDuration) {
         String conditionString = '';
 
         String firstFilter = firstFilter(selectedDoctor, selectedPatient);
-        // String secondFilter = secondFilter(selectedDate);
-        // String thirdFilter = thirdFilter(selectedDuration);
+        String secondFilter = secondFilter(selectedDatetime);
+        String thirdFilter = thirdFilter(selectedDuration);
 
         if (!String.isEmpty(firstFilter)) {
             conditionString = '(' + firstFilter + ')';
         }
 
-        /* if (!String.isEmpty(secondFilter)) {
+        if (!String.isEmpty(secondFilter)) {
             conditionString = '(' + secondFilter + ')';
         }
 
@@ -105,7 +105,7 @@ public with sharing class AppointmentsControllerLWC {
 
         if (!String.isEmpty(firstFilter) && !String.isEmpty(secondFilter) && !String.isEmpty(thirdFilter)) {
             conditionString = '(' + firstFilter + ') AND (' + secondFilter + ') AND (' + thirdFilter + ')';
-        } */
+        }
 
         return conditionString;
     }
@@ -133,6 +133,74 @@ public with sharing class AppointmentsControllerLWC {
         }
 
         return firstFilter;
+    }
+
+    private static String secondFilter(String selectedDatetime) {
+System.debug('Initial: ' + selectedDatetime);
+
+        string secondFilter = '';
+
+        if(!String.isEmpty(selectedDatetime)) {
+            Datetime deserializedDatetime = (Datetime)JSON.deserialize('"' + selectedDatetime + '"', DateTime.class);
+
+System.debug('Deserialized: ' + deserializedDatetime);
+System.debug('Deserialized .day(): ' + deserializedDatetime.dayGmt());
+
+            Integer year = deserializedDatetime.year();
+            Integer month = deserializedDatetime.month();
+            Integer day = deserializedDatetime.day();
+            Integer dayGmt = deserializedDatetime.dayGmt();
+
+            Datetime lowerDatetime = Date.newInstance(year, month, dayGmt);
+
+            //
+/* String aaa = UserInfo.getTimeZone().getID();
+
+Datetime newDt1 = (Datetime)JSON.deserialize('"' + lowerDatetime.format('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'', aaa) + '"', Datetime.class);
+System.debug('New: ' + newDt1);
+
+Integer year1 = newDt1.year();
+Integer month1 = newDt1.month();
+Integer day1 = newDt1.day();
+Integer dayGmt1 = newDt1.dayGmt();
+
+Datetime lowerDt1 = Date.newInstance(year1, month1, dayGmt1);
+Datetime higherDt1 = lowerDt1.addDays(1);
+
+String formattedL = JSON.serialize(lowerDt1).remove('"');
+
+System.debug(formattedL);
+
+String formattedH = JSON.serialize(higherDt1).remove('"');
+
+System.debug(formattedH); */
+            //
+
+            Datetime higherDatetime = lowerDatetime.addDays(1);
+System.debug('Higher (+1 day): ' + higherDatetime);
+
+            String formattedLower = JSON.serialize(lowerDatetime).remove('"');
+            String formattedHigher = JSON.serialize(higherDatetime).remove('"');
+
+            secondFilter = 'Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedHigher;
+
+            // почему Datetime dt = (Datetime)JSON.deserialize(selectedDatetime, DateTime.class); возвращает 2021-01-01 00:00:00
+            // а Datetime dt = (Datetime)JSON.deserialize('"' + selectedDatetime + '"', DateTime.class); возвращает нормальную дату и время
+        }
+
+System.debug(secondFilter);
+
+        return secondFilter;
+    }
+
+    private static String thirdFilter(String selectedDuration) {
+        String thirdFilter = '';
+
+        if(!String.isEmpty(selectedDuration)) {
+            thirdFilter = ' Duration_in_minutes__c=' + selectedDuration;
+        }
+
+        return thirdFilter;
     }
 
     private static String generateQuery(String condition) {

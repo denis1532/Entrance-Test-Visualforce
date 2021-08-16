@@ -2,22 +2,14 @@
     padding: 0 1rem 1rem 1rem;
 }
 
-/*.THIS .doctors_selector .patients_selector .datetime_selector {
-    padding: 0 1rem 1rem 1rem; // !!! так почему-то не работает
-}*/
-/*
-.THIS .doctors_selector {
-    padding: 0 1rem 1rem 1rem;
+.additional_button {
+    padding: 0 0 0 0.25rem;
 }
 
-.THIS .patients_selector {
-    padding: 0 1rem 1rem 1rem;
-}
+/* .datetime_input .slds-form .slds-form-element .slds-form-element__control .slds-form-element__group .slds-form-element__row {
+    margin-bottom: 0 !important;
+} */
 
-.THIS .datetime_selector {
-    padding: 0 1rem 1rem 1rem;
-}
-
-.THIS .duration_input {
-    padding: 0 1rem 1rem 1rem;
-}*/
+/* :host {
+    --lwc-spacingXxSmall: 0;
+} */
