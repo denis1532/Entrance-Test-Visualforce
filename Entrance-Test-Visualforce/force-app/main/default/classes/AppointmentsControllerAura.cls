@@ -1,5 +1,6 @@
 public class AppointmentsControllerAura {
 
+    @TestVisible
     private class AppointmentsDatatableWrapper {
         @AuraEnabled
         public Integer pageSize { get; set; }

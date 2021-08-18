@@ -1,10 +1,14 @@
 import { LightningElement, api, track, wire } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { refreshApex } from '@salesforce/apex';
 import utils from 'c/utils';
 import timeZone from '@salesforce/i18n/timeZone';
 import getDoctors from '@salesforce/apex/AppointmentsControllerLWC.getDoctors';
 import getWorkingHours from '@salesforce/apex/AppointmentsControllerLWC.getWorkingHours';
 import getPatients from '@salesforce/apex/AppointmentsControllerLWC.getPatients';
 import getAppointments from '@salesforce/apex/AppointmentsControllerLWC.getAppointments';
+import saveAppointment from '@salesforce/apex/AppointmentsControllerLWC.saveAppointment';
+import deleteAppointment from '@salesforce/apex/AppointmentsControllerLWC.deleteAppointment';
 
 const TIME_ZONE = timeZone;
 
@@ -45,33 +49,39 @@ export default class AppointmentsTableLWC extends LightningElement {
     columns = COLUMNS;
 
     pageSizes = PAGE_SIZES;
-    @track selectedPagesize = this.pageSizes[0].value;
+    selectedPagesize = this.pageSizes[0].value;
 
     @track doctors = '';
     @track patients = '';
-    @track selectedDoctor = '';
-    @track selectedPatient = '';
-    @track datetime = '';
-    @track duration = '';
+    selectedDoctor = '';
+    selectedPatient = '';
+    datetime = '';
+    duration = '';
 
-    @track pageNumber = 1;
-    @track totalRecords = '';
-    @track recordStart = '';
-    @track recordEnd = '';
-    @track totalPages = '';
-    @track totalPages = '';
+    pageNumber = 1;
+    totalRecords = '';
+    recordStart = '';
+    recordEnd = '';
+    totalPages = '';
 
-    @track disabledNextButton;
-    @track disabledPrevButton;
+    disabledNextButton;
+    disabledPrevButton;
 
-    @track startingRecordNumber;
-    @track endingRecordNumber;
+    startingRecordNumber;
+    endingRecordNumber;
 
     @track appointments;
+    wiredAppointmentsData;
 
-    @track displayWorkingHours = false;
+    displayWorkingHours = false;
+    workingHoursStart;
+    workingHoursEnd;
 
-    @track displayData;
+    displayData;
+
+    appointmentToDelete;
+    appointmentToDeleteLink;
+    showConfirmDialog = false;
 
     @wire(getDoctors)
     wiredDoctors({ error, data }) {
@@ -105,44 +115,38 @@ export default class AppointmentsTableLWC extends LightningElement {
         }
     }
 
-    /* @wire(getWorkingHours,  {selectedDoctor: '$selectedDoctor'})
-    wiredWorkinghours({ error, data }) {
-        if(data) {
-
-        }
-    } */
-
     @wire(getPatients)
-    wiredPatients({ error, data }) {
-        if (data) {
-            let patientOptions = utils.getOptions(data);
+    wiredPatients(result) {
+        if (result.data) {
+            let patientOptions = utils.getOptions(result.data);
 
             this.patients = patientOptions;
             this.selectedPatient = this.patients[0].value;
-        } else if (error) {
-            console.log(error);
-            this.error = error;
+        } else if (result.error) {
+            console.log(result.error);
         }
     }
 
     @wire(getAppointments, {selectedDoctor: '$selectedDoctor', selectedPatient: '$selectedPatient', selectedDatetime: '$datetime', selectedDuration: '$duration', pageNumber: '$pageNumber', pageSize: '$selectedPagesize'})
-    wiredAppointments({ error, data }) {
-        if (data) {
+    wiredAppointments(result) {
+        this.wiredAppointmentsData = result;
+
+        if (result.data) {
             let tempRecordsList = [];
 
-            if (data.appointments.length > 0) {
+            if (result.data.appointments.length > 0) {
                 this.displayData = true;
             } else {
                 this.displayData = false;
             }
 
-            this.totalRecords = data.totalRecords;
-            this.recordStart = data.recordStart;
-            this.recordEnd = data.recordEnd;
-            this.totalPages = Math.ceil(data.totalRecords / this.selectedPagesize);
+            this.totalRecords = result.data.totalRecords;
+            this.recordStart = result.data.recordStart;
+            this.recordEnd = result.data.recordEnd;
+            this.totalPages = Math.ceil(result.data.totalRecords / this.selectedPagesize);
 
             this.startingRecordNumber = (this.pageNumber - 1) * this.selectedPagesize;
-            this.endingRecordNumber = (this.pageNumber - 1) * this.selectedPagesize + data.appointments.length;
+            this.endingRecordNumber = (this.pageNumber - 1) * this.selectedPagesize + result.data.appointments.length;
 
             if (this.pageNumber == this.totalPages) {
                 this.disabledNextButton = true;
@@ -156,7 +160,7 @@ export default class AppointmentsTableLWC extends LightningElement {
                 this.disabledPrevButton = false;
             }
 
-            data.appointments.forEach(row => {
+            result.data.appointments.forEach(row => {
                 let tempRow = Object.assign({}, row);
 
                 tempRow.viewLink = '/' + row.Id;
@@ -168,9 +172,8 @@ export default class AppointmentsTableLWC extends LightningElement {
             });
 
             this.appointments = tempRecordsList;
-        } else if (error) {
-            console.log(error);
-            this.error = error;
+        } else if (result.error) {
+            console.log(result.error);
         }
     }
 
@@ -179,13 +182,15 @@ export default class AppointmentsTableLWC extends LightningElement {
 
         this.datetime = today.toISOString();
 
-        // this.pageNumber = 1;
+        this.pageNumber = 1;
     }
 
     onDoctorChange(event) {
         this.selectedDoctor = event.target.value;
 
         this.pageNumber = 1;
+
+        this.getDoctorWorkingHours();
     }
 
     onPatientChange(event) {
@@ -216,6 +221,8 @@ export default class AppointmentsTableLWC extends LightningElement {
         this.selectedDoctor = '';
 
         this.pageNumber = 1;
+
+        this.displayWorkingHours = false;
     }
 
     onPatientClear() {
@@ -236,13 +243,120 @@ export default class AppointmentsTableLWC extends LightningElement {
         this.pageNumber = 1;
     }
 
+    getDoctorWorkingHours() {
+        if (this.selectedDoctor && typeof this.selectedDoctor !== "undefined") {
+            this.displayWorkingHours = true;
+            getWorkingHours({
+                selectedDoctor: this.selectedDoctor
+            })
+            .then(result => {
+                let unixTimeStart = result[0].Working_Hours_Start__c;
+                let unixTimeEnd = result[0].Working_Hours_End__c;
+
+                let dateStart = new Date(unixTimeStart);
+                let dateEnd = new Date(unixTimeEnd);
+
+                this.workingHoursStart = utils.formatAMPM(dateStart);
+                this.workingHoursEnd = utils.formatAMPM(dateEnd);
+            })
+        } else {
+            this.displayWorkingHours = false;
+        }
+    }
+
+    handleSaveAppointment() {
+        if (!this.selectedDoctor || !this.selectedPatient || !this.datetime || !this.duration) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title : 'Warning!',
+                    message: 'Please, fill in all the fields before creating an appointment!',
+                    variant: 'warning',
+                    mode: 'dismissable'
+                }),
+            );
+        } else {
+            saveAppointment({
+                selectedDoctor: this.selectedDoctor,
+                selectedPatient: this.selectedPatient,
+                selectedDate: this.datetime,
+                selectedDuration: this.duration
+            })
+            .then(result => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title : 'Success!',
+                        message: 'New appointment has been created! See it {0}!',
+                        messageData: [{ url: '/' + result.Id, label: 'here' }],
+                        variant: 'success',
+                        mode: 'pester'
+                    })
+                );
+                return refreshApex(this.wiredAppointmentsData);
+            })
+            .catch(error => {
+                this.error = error;
+
+                error.body.pageErrors.forEach(pageError => {
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Error creating an appointment',
+                            message: pageError.message,
+                            variant: 'error'
+                        }),
+                    )
+                })
+                console.log(error);
+            })
+        }
+    }
+
+    handleDeleteAppointment() {
+        deleteAppointment({
+            appointmentToDelete: JSON.stringify(this.appointmentToDelete)
+        })
+        .then(() => {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title : 'Success!',
+                    message: 'Appointment {0} has been deleted!',
+                    messageData: ['"' + this.appointmentToDelete.Name + '"'],
+                    variant: 'success',
+                    mode: 'pester'
+                })
+            );
+
+            this.appointmentToDelete = '';
+            this.appointmentToDeleteLink = '';
+
+            return refreshApex(this.wiredAppointmentsData);
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }
+
     handleRowAction(event) {
         let actionName = event.detail.action.name;
         let record = event.detail.row;
 
         if (actionName === 'Delete') {
-            console.log('Delete action');
+            this.appointmentToDelete = record;
+            this.appointmentToDeleteLink = '/' + record.Id;
+            this.showConfirmDialog = true;
         }
+    }
+
+    handleHideDialog() {
+        this.showConfirmDialog = false;
+
+        this.appointmentToDelete = '';
+        this.appointmentToDeleteLink = '';
+    }
+
+    handleDialogYes() {
+        this.handleDeleteAppointment();
+
+        this.showConfirmDialog = false;
     }
 
     handleClickNext() {

@@ -186,6 +186,46 @@ private class AppointmentsControllerTest {
     }
 
     @isTest
+    static void testSaveNewAppointment() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
+
+        System.debug(TestAppointmentsController.NewAppointment);
+
+        List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
+        System.assertEquals(5, TestAppointmentsList.size());
+
+        TestAppointmentsController.selectedDoctorId = TestAppointmentsController.getSelectedDoctor().get(2).getValue();
+        TestAppointmentsController.selectedPatientId = TestAppointmentsController.getSelectedPatient().get(2).getValue();
+        TestAppointmentsController.searchDateTime = Datetime.newInstance(2021, 02, 05, 10, 00, 00);
+        TestAppointmentsController.searchDuration = 15;
+
+        TestAppointmentsList = TestAppointmentsController.getAppointments();
+
+        TestAppointmentsController.saveNewAppointment();
+
+        List<Appointment__c> TestAppointmentsListAfterSave = TestAppointmentsController.getAppointments();
+        System.assertEquals(1, TestAppointmentsListAfterSave.size());
+
+        // Test catch exception in saveNewAppointment
+        TestAppointmentsController.saveNewAppointment();
+    }
+
+    @isTest
+    static void testDeleteAppointment() {
+        AppointmentsController TestAppointmentsController = new AppointmentsController();
+
+        List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();
+        System.assertEquals(5, TestAppointmentsList.size());
+
+        TestAppointmentsController.selectedAppointmentId = '';
+        System.currentPageReference().getParameters().put('AppointmentId', TestAppointmentsList.get(0).Id);
+        TestAppointmentsController.deleteSelectedAppointment();
+
+        TestAppointmentsList = TestAppointmentsController.getAppointments();
+        System.assertEquals(4, TestAppointmentsList.size());
+    }
+
+    @isTest
     static void testPagination() {
         AppointmentsController TestAppointmentsController = new AppointmentsController();
         List<Appointment__c> TestAppointmentsList = TestAppointmentsController.getAppointments();

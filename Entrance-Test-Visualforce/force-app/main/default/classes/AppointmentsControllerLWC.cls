@@ -1,5 +1,6 @@
-public with sharing class AppointmentsControllerLWC {
+public class AppointmentsControllerLWC {
 
+    @TestVisible
     private class AppointmentsDatatableWrapper {
         @AuraEnabled
         public Integer pageSize { get; set; }
@@ -60,8 +61,6 @@ public with sharing class AppointmentsControllerLWC {
         query += ' LIMIT ' + pageSize;
         query += ' OFFSET ' + offset;
 
-// System.debug(query);
-
         appointmentWrapper.appointments = Database.query(query);
 
         return appointmentWrapper;
@@ -74,6 +73,27 @@ public with sharing class AppointmentsControllerLWC {
         List<Doctor__c> workingHours = Database.query(query);
 
         return workingHours;
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static Appointment__c saveAppointment(String selectedDoctor, String selectedPatient, String selectedDate, String selectedDuration) {
+        Appointment__c newAppointment = new Appointment__c(
+            Doctor__c = selectedDoctor,
+            Patient__c = selectedPatient,
+            Appointment_Date__c = (Datetime)JSON.deserialize('"' + selectedDate + '"', DateTime.class),
+            Duration_in_minutes__c = (Decimal)JSON.deserialize(selectedDuration, Decimal.class)
+        );
+
+        insert newAppointment;
+
+        return newAppointment;
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static void deleteAppointment(String appointmentToDelete) {
+        Appointment__c appointment = (Appointment__c)JSON.deserialize(appointmentToDelete, Appointment__c.class);
+
+        delete appointment;
     }
 
     private static String generateConditionString(String selectedDoctor, String selectedPatient, String selectedDatetime, String selectedDuration) {
