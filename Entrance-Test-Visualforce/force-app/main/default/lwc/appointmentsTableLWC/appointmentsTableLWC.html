@@ -161,26 +161,27 @@
 
         <template if:true={displayData}>
             <lightning-datatable key-field="id"
-                                data={appointments}
-                                columns={columns}
-                                hide-checkbox-column="true"
-                                onrowaction={handleRowAction}>
+                                 data={appointments}
+                                 columns={columns}
+                                 hide-checkbox-column="true"
+                                 onrowaction={handleRowAction}>
             </lightning-datatable>
             <div class="slds-clearfix">
                 <div class="slds-page-header" role="banner">
                     <div class="slds-float_right">
                         <lightning-button label="Prev"
-                                        icon-name="utility:chevronleft"
-                                        icon-position="left"
-                                        onclick={handleClickPrev}
-                                        disabled={disabledPrevButton}>
+                                          icon-name="utility:chevronleft"
+                                          icon-position="left"
+                                          onclick={handleClickPrev}
+                                          disabled={disabledPrevButton}>
                         </lightning-button>
 
-                        <lightning-button label="Next"
-                                        icon-name="utility:chevronright"
-                                        icon-position="right"
-                                        onclick={handleClickNext}
-                                        disabled={disabledNextButton}>
+                        <lightning-button class="additional_button"
+                                          label="Next"
+                                          icon-name="utility:chevronright"
+                                          icon-position="right"
+                                          onclick={handleClickNext}
+                                          disabled={disabledNextButton}>
                         </lightning-button>
                     </div>
                     <p class="slds-page-header__title">Page {pageNumber} of {totalPages} | Showing records from {startingRecordNumber} to {endingRecordNumber}</p>
