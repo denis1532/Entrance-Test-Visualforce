@@ -160,7 +160,7 @@ System.debug('Initial: ' + selectedDatetime);
 
         string secondFilter = '';
 
-        if(!String.isEmpty(selectedDatetime)) {
+        if (!String.isEmpty(selectedDatetime)) {
             Datetime deserializedDatetime = (Datetime)JSON.deserialize('"' + selectedDatetime + '"', DateTime.class);
 
 System.debug('Deserialized: ' + deserializedDatetime);
@@ -216,7 +216,7 @@ System.debug(secondFilter);
     private static String thirdFilter(String selectedDuration) {
         String thirdFilter = '';
 
-        if(!String.isEmpty(selectedDuration)) {
+        if (!String.isEmpty(selectedDuration)) {
             thirdFilter = ' Duration_in_minutes__c=' + selectedDuration;
         }
 

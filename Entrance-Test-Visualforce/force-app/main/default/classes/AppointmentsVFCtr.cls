@@ -1,4 +1,5 @@
-public class AppointmentsController {
+public class AppointmentsVFCtr {
+
     // Query string
     public String query;
     public String workingHoursQuery;
@@ -13,16 +14,16 @@ public class AppointmentsController {
     public String totalRecordsNumber;
 
     // Sort by field
-    public String sortOrder {get;set;}
+    public String sortOrder { get; set; }
     // Sort order
     private String ascOrDesc;
 
     // Picklist options
-    public String selectedDoctorId {get;set;}
-    public String selectedPatientId {get;set;}
+    public String selectedDoctorId { get; set; }
+    public String selectedPatientId { get; set; }
 
     // Date search
-    public Datetime searchDateTime {get;set;}
+    public Datetime searchDateTime { get; set; }
     // Comparison for date query
     Date conversedDate;
     Datetime lowerComparisonDate;
@@ -31,21 +32,21 @@ public class AppointmentsController {
     String formattedUpper;
 
     // Duration search
-    public Integer searchDuration {get;set;}
+    public Integer searchDuration { get; set; }
 
     // Pagination
     private Integer counter;
     private Integer listSize;
-    public Integer totalSize {get;set;}
+    public Integer totalSize { get; set; }
 
     // Add New Appointment
-    public Appointment__c NewAppointment {get;set;}
+    public Appointment__c NewAppointment { get; set; }
 
     // For delete buttons
-    public String selectedAppointmentId {get;set;}
+    public String selectedAppointmentId { get; set; }
 
     /*** ---------- Init ---------- ***/
-    public AppointmentsController() {
+    public AppointmentsVFCtr() {
         // Initialization properties
         this.sortOrder = 'Doctor__r.Name';
         this.ascOrDesc = ' ASC ';
@@ -263,27 +264,29 @@ public class AppointmentsController {
     }
 
     /*** ---------- PAGINATION ---------- ***/
-
+// BUG in pagination
+// fix pagination bug with if (counter > 0) not returning false
+// and on switching to any page and applying any search parameter, the page number won't change
     // First Page
-    public PageReference Beginning() {
+    public PageReference beginning() {
     	counter = 0;
       	return null;
     }
 
     // Previous Page
-   	public PageReference Previous() {
+   	public PageReference previous() {
       	counter -= listSize;
       	return null;
    	}
 
     // Next Page
-   	public PageReference Next() {
+   	public PageReference next() {
       	counter += listSize;
       	return null;
    	}
 
  	// Last Page
-   	public PageReference End() {
+   	public PageReference end() {
       	counter = totalSize - math.mod(totalSize, listSize);
       	return null;
    	}
@@ -312,4 +315,5 @@ public class AppointmentsController {
          	return (totalSize/listSize);
       	}
    	}
+
 }

@@ -1,4 +1,4 @@
-<apex:page docType="html-5.0" controller="AppointmentsController">
+<apex:page docType="html-5.0" controller="AppointmentsVFCtr">
     <style type="text/css">
         /* .pbTitle {display: none;}
         .paginationBlock {text-align: center;} */
@@ -29,11 +29,11 @@
             <!-- Pagination buttons -->
             <apex:pageBlockButtons location="bottom" styleClass="paginationBlock" >
                 <apex:outputPanel id="navigation" >
-                    <apex:commandButton action="{! Beginning }" title="First Page" value="<<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation" />
-                    <apex:commandButton action="{! Previous }" title="Previous Page" value="<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation" />
+                    <apex:commandButton action="{! beginning }" title="First Page" value="<<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation" />
+                    <apex:commandButton action="{! previous }" title="Previous Page" value="<" disabled="{! disableBeginningPrevious }" reRender="appointments_list, navigation" />
                     	<apex:outputText >Page # {! pageNumber } of {! totalPages }</apex:outputText>
-                    <apex:commandButton action="{! Next }" title="Next Page" value=">" disabled="{! disableNextEnd }" reRender="appointments_list, navigation" />
-                    <apex:commandButton action="{! End }" title="Last Page" value=">>" disabled="{! disableNextEnd }" reRender="appointments_list, navigation" />
+                    <apex:commandButton action="{! next }" title="Next Page" value=">" disabled="{! disableNextEnd }" reRender="appointments_list, navigation" />
+                    <apex:commandButton action="{! end }" title="Last Page" value=">>" disabled="{! disableNextEnd }" reRender="appointments_list, navigation" />
                 </apex:outputPanel>
             </apex:pageBlockButtons>
 

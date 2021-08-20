@@ -11,14 +11,14 @@ public class AppointmentsAuraCtrTest {
         Time newWorkingHoursStart = (Time)JSON.deserialize('"' + timeStart + '"', Time.class);
         Time newWorkingHoursEnd = (Time)JSON.deserialize('"' + timeEnd + '"', Time.class);
 
-        Doctor__c NewDoctor1 = TestDataMethods.CreateTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
-        Doctor__c NewDoctor2 = TestDataMethods.CreateTestDoctor(2, newWorkingHoursStart, newWorkingHoursEnd);
+        Doctor__c NewDoctor1 = AppointmentsTestDataMethods.createTestDoctor(1, newWorkingHoursStart, newWorkingHoursEnd);
+        Doctor__c NewDoctor2 = AppointmentsTestDataMethods.createTestDoctor(2, newWorkingHoursStart, newWorkingHoursEnd);
         insert NewDoctor1;
         insert NewDoctor2;
 
         /*** New patient ***/
-        Patient__c NewPatient1 = TestDataMethods.CreateTestPatient(1);
-        Patient__c NewPatient2 = TestDataMethods.CreateTestPatient(2);
+        Patient__c NewPatient1 = AppointmentsTestDataMethods.createTestPatient(1);
+        Patient__c NewPatient2 = AppointmentsTestDataMethods.createTestPatient(2);
         insert NewPatient1;
         insert NewPatient2;
 
@@ -26,35 +26,35 @@ public class AppointmentsAuraCtrTest {
         String dt1 = '2021-02-02T10:00:00.000Z';
         Datetime newCorrectDatetime1 = (Datetime)JSON.deserialize('"' + dt1 + '"', DateTime.class);
 
-        Appointment__c TestAppointment1 = TestDataMethods.CreateTestAppointment(1, newCorrectDatetime1, 15, NewDoctor1, NewPatient1);
+        Appointment__c TestAppointment1 = AppointmentsTestDataMethods.createTestAppointment(1, newCorrectDatetime1, 15, NewDoctor1, NewPatient1);
         insert TestAppointment1;
 
         /*** New appointment2 with correct time for doctor1 and patient2 ***/
         String dt2 = '2021-02-02T11:00:00.000Z';
         Datetime newCorrectDatetime2 = (Datetime)JSON.deserialize('"' + dt2 + '"', DateTime.class);
 
-        Appointment__c TestAppointment2 = TestDataMethods.CreateTestAppointment(2, newCorrectDatetime2, 40, NewDoctor1, NewPatient2);
+        Appointment__c TestAppointment2 = AppointmentsTestDataMethods.createTestAppointment(2, newCorrectDatetime2, 40, NewDoctor1, NewPatient2);
         insert TestAppointment2;
 
         /*** New appointment3 with correct time for doctor2 and patient1 ***/
         String dt3 = '2021-02-03T10:00:00.000Z';
         Datetime newCorrectDatetime3 = (Datetime)JSON.deserialize('"' + dt3 + '"', DateTime.class);
 
-        Appointment__c TestAppointment3 = TestDataMethods.CreateTestAppointment(3, newCorrectDatetime3, 15, NewDoctor2, NewPatient1);
+        Appointment__c TestAppointment3 = AppointmentsTestDataMethods.createTestAppointment(3, newCorrectDatetime3, 15, NewDoctor2, NewPatient1);
         insert TestAppointment3;
 
         /*** New appointment4 with correct time for doctor2 and patient2 ***/
         String dt4 = '2021-02-03T10:30:00.000Z';
         Datetime newCorrectDatetime4 = (Datetime)JSON.deserialize('"' + dt4 + '"', DateTime.class);
 
-        Appointment__c TestAppointment4 = TestDataMethods.CreateTestAppointment(4, newCorrectDatetime4, 15, NewDoctor2, NewPatient2);
+        Appointment__c TestAppointment4 = AppointmentsTestDataMethods.createTestAppointment(4, newCorrectDatetime4, 15, NewDoctor2, NewPatient2);
         insert TestAppointment4;
 
         /*** New appointment5 with correct time for doctor2 and patient2 ***/
         String dt5 = '2021-02-03T11:00:00.000Z';
         Datetime newCorrectDatetime5 = (Datetime)JSON.deserialize('"' + dt5 + '"', DateTime.class);
 
-        Appointment__c TestAppointment5 = TestDataMethods.CreateTestAppointment(5, newCorrectDatetime5, 40, NewDoctor2, NewPatient2);
+        Appointment__c TestAppointment5 = AppointmentsTestDataMethods.createTestAppointment(5, newCorrectDatetime5, 40, NewDoctor2, NewPatient2);
         insert TestAppointment5;
     }
 
@@ -70,14 +70,14 @@ public class AppointmentsAuraCtrTest {
 
     /*** ---------- Test controller ---------- ***/
     @isTest
-    static void testAppointmentsController() {
+    static void testGeneratedData() {
         AppointmentsAuraCtr TestAppointmentsAuraCtr = new AppointmentsAuraCtr();
 
-        System.assertEquals(2, Database.query(TestDataMethods.doctorsAssertion).size());
+        System.assertEquals(2, Database.query(AppointmentsTestDataMethods.doctorsAssertion).size());
 
-        System.assertEquals(2, Database.query(TestDataMethods.patientsAssertion).size());
+        System.assertEquals(2, Database.query(AppointmentsTestDataMethods.patientsAssertion).size());
 
-        System.assertEquals(5, Database.query(TestDataMethods.appointmentsAssertion).size());
+        System.assertEquals(5, Database.query(AppointmentsTestDataMethods.appointmentsAssertion).size());
     }
 
     /*** ---------- Test getDoctors method ---------- ***/
@@ -182,7 +182,7 @@ public class AppointmentsAuraCtrTest {
 
         AppointmentsAuraCtr.saveAppointment(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration);
 
-        System.assertEquals(6, Database.query(TestDataMethods.appointmentsAssertion).size());
+        System.assertEquals(6, Database.query(AppointmentsTestDataMethods.appointmentsAssertion).size());
     }
 
     /*** ---------- Test deleteAppointment method ---------- ***/
@@ -194,6 +194,7 @@ public class AppointmentsAuraCtrTest {
 
         AppointmentsAuraCtr.deleteAppointment(serializedAppointmentToDelete);
 
-        System.assertEquals(4, Database.query(TestDataMethods.appointmentsAssertion).size());
+        System.assertEquals(4, Database.query(AppointmentsTestDataMethods.appointmentsAssertion).size());
     }
+
 }

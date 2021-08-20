@@ -1,4 +1,4 @@
-public with sharing class AppointmentCreationTriggerHandler {
+public with sharing class AppointmentTriggerHandler {
 
     public static void OnBeforeInsertCheck (List<Appointment__c> record) {
         Set<Id> docIds = new Set<Id>();

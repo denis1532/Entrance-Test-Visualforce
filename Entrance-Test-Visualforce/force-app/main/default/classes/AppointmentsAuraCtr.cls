@@ -23,14 +23,20 @@ public class AppointmentsAuraCtr {
 
     @AuraEnabled
     public static List<Doctor__c> getDoctors() {
-        List<Doctor__c> doctors = [SELECT Id, Name, Working_Hours_Start__c, Working_Hours_End__c FROM Doctor__c ORDER BY Name LIMIT 50000];
+        List<Doctor__c> doctors = [SELECT Id, Name, Working_Hours_Start__c, Working_Hours_End__c
+                                   FROM Doctor__c
+                                   ORDER BY Name
+                                   LIMIT 50000];
 
         return doctors;
     }
 
     @AuraEnabled
     public static List<Patient__c> getPatients() {
-        List<Patient__c> patients = [SELECT Id, Name FROM Patient__c ORDER BY Name LIMIT 50000];
+        List<Patient__c> patients = [SELECT Id, Name
+                                     FROM Patient__c
+                                     ORDER BY Name
+                                     LIMIT 50000];
 
         return patients;
     }
@@ -124,7 +130,7 @@ System.debug('Initial: ' + selectedDate);
 
         string secondFilter = '';
 
-        if(!String.isEmpty(selectedDate)) {
+        if (!String.isEmpty(selectedDate)) {
             Datetime deserializedDatetime = (Datetime)JSON.deserialize('"' + selectedDate + '"', DateTime.class);
 
 System.debug('Deserialized: ' + deserializedDatetime);
@@ -180,7 +186,7 @@ System.debug(secondFilter);
     private static String thirdFilter(String selectedDuration) {
         String thirdFilter = '';
 
-        if(!String.isEmpty(selectedDuration)) {
+        if (!String.isEmpty(selectedDuration)) {
             thirdFilter = ' Duration_in_minutes__c=' + selectedDuration;
         }
 
@@ -254,4 +260,5 @@ System.debug(secondFilter);
 
         return generatedWorkingHoursQuery;
     }
+
 }
