@@ -3,12 +3,12 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import utils from 'c/utils';
 import timeZone from '@salesforce/i18n/timeZone';
-import getDoctors from '@salesforce/apex/AppointmentsControllerLWC.getDoctors';
-import getWorkingHours from '@salesforce/apex/AppointmentsControllerLWC.getWorkingHours';
-import getPatients from '@salesforce/apex/AppointmentsControllerLWC.getPatients';
-import getAppointments from '@salesforce/apex/AppointmentsControllerLWC.getAppointments';
-import saveAppointment from '@salesforce/apex/AppointmentsControllerLWC.saveAppointment';
-import deleteAppointment from '@salesforce/apex/AppointmentsControllerLWC.deleteAppointment';
+import getDoctors from '@salesforce/apex/AppointmentsLWCCtr.getDoctors';
+import getWorkingHours from '@salesforce/apex/AppointmentsLWCCtr.getWorkingHours';
+import getPatients from '@salesforce/apex/AppointmentsLWCCtr.getPatients';
+import getAppointments from '@salesforce/apex/AppointmentsLWCCtr.getAppointments';
+import saveAppointment from '@salesforce/apex/AppointmentsLWCCtr.saveAppointment';
+import deleteAppointment from '@salesforce/apex/AppointmentsLWCCtr.deleteAppointment';
 
 const TIME_ZONE = timeZone;
 
@@ -18,9 +18,9 @@ const COLUMNS = [
         tooltip: { fieldName: 'tooltip' },
         target: '_self' }
     },
-    { label: 'Doctor\'s Name', fieldName: 'doctorName', type: 'text' },
-    { label: 'Patient\'s Name', fieldName: 'patientName', type: 'text' },
-    { label: 'Date', fieldName: 'Appointment_Date__c', type: 'date', typeAttributes: {
+    { label: 'Doctor\'s Name', fieldName: 'doctorName', type: 'text', sortable: 'true' },
+    { label: 'Patient\'s Name', fieldName: 'patientName', type: 'text', sortable: 'true' },
+    { label: 'Date', fieldName: 'Appointment_Date__c', type: 'date', sortable: 'true', typeAttributes: {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
@@ -30,7 +30,7 @@ const COLUMNS = [
         timeZoneName: 'short',
         timeZone: TIME_ZONE }
     },
-    { label: 'Duration', fieldName: 'Duration_in_minutes__c', type: 'number' },
+    { label: 'Duration', fieldName: 'Duration_in_minutes__c', type: 'number', sortable: 'true' },
     { type: 'button', typeAttributes: {
         iconName: 'utility:delete',
         label: 'Delete',
@@ -64,11 +64,9 @@ export default class AppointmentsTableLWC extends LightningElement {
     recordEnd = '';
     totalPages = '';
 
-    disabledNextButton;
-    disabledPrevButton;
-
-    startingRecordNumber;
-    endingRecordNumber;
+    defaultSortDirection = 'asc';
+    sortedDirection;
+    sortedBy;
 
     @track appointments;
     wiredAppointmentsData;
@@ -82,6 +80,12 @@ export default class AppointmentsTableLWC extends LightningElement {
     appointmentToDelete;
     appointmentToDeleteLink;
     showConfirmDialog = false;
+
+    disabledNextButton;
+    disabledPrevButton;
+
+    startingRecordNumber;
+    endingRecordNumber;
 
     @wire(getDoctors)
     wiredDoctors({ error, data }) {
@@ -238,7 +242,7 @@ export default class AppointmentsTableLWC extends LightningElement {
     }
 
     onDurationClear() {
-        this.duration = null;
+        this.duration = '';
 
         this.pageNumber = 1;
     }
@@ -333,6 +337,31 @@ export default class AppointmentsTableLWC extends LightningElement {
         .catch(error => {
             console.log(error);
         })
+    }
+
+    handleSort(event) {
+        this.sortedBy = event.detail.fieldName;
+        this.sortedDirection = event.detail.sortDirection;
+        this.sortData(event.detail.fieldName, event.detail.sortDirection)
+    }
+
+    sortData(fieldName, direction) {
+        let parsedData = JSON.parse(JSON.stringify(this.appointments));
+
+        let keyValue = (a) => {
+            return a[fieldName]
+        };
+
+        let isReverse = direction === 'asc' ? 1 : -1;
+
+        parsedData.sort((x, y) => {
+            x = keyValue(x) ? keyValue(x) : '';
+            y = keyValue(y) ? keyValue(y) : '';
+
+            return isReverse * ((x > y) - (y > x))
+        });
+
+        this.appointments = parsedData;
     }
 
     handleRowAction(event) {

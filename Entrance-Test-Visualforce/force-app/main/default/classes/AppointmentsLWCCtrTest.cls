@@ -1,5 +1,5 @@
 @isTest
-public class AppointmentsControllerLWCTest {
+public class AppointmentsLWCCtrTest {
 
     @TestSetup
     static void testData() {
@@ -59,7 +59,7 @@ public class AppointmentsControllerLWCTest {
     }
 
     /* static {
-        AppointmentsControllerLWC.AppointmentsDatatableWrapper testWrapper = new AppointmentsControllerLWC.AppointmentsDatatableWrapper();
+        AppointmentsLWCCtr.AppointmentsDatatableWrapper testWrapper = new AppointmentsLWCCtr.AppointmentsDatatableWrapper();
 
         String selectedDoctor = '';
         String selectedPatient = '';
@@ -70,7 +70,7 @@ public class AppointmentsControllerLWCTest {
         Integer pageSize = 10;
     } */
 
-    public static AppointmentsControllerLWC.AppointmentsDatatableWrapper testWrapper = new AppointmentsControllerLWC.AppointmentsDatatableWrapper();
+    public static AppointmentsLWCCtr.AppointmentsDatatableWrapper testWrapper = new AppointmentsLWCCtr.AppointmentsDatatableWrapper();
 
     public static String selectedDoctor = '';
     public static String selectedPatient = '';
@@ -81,7 +81,7 @@ public class AppointmentsControllerLWCTest {
     public static Integer pageSize = 10;
 
     /* static void init() {
-        AppointmentsControllerLWC.AppointmentsDatatableWrapper testWrapper = new AppointmentsControllerLWC.AppointmentsDatatableWrapper();
+        AppointmentsLWCCtr.AppointmentsDatatableWrapper testWrapper = new AppointmentsLWCCtr.AppointmentsDatatableWrapper();
 
         String selectedDoctor = '';
         String selectedPatient = '';
@@ -95,7 +95,7 @@ public class AppointmentsControllerLWCTest {
     /*** ---------- Test controller ---------- ***/
     @isTest
     static void testAppointmentsController() {
-        AppointmentsControllerLWC TestAppointmentsControllerLWC = new AppointmentsControllerLWC();
+        AppointmentsLWCCtr TestAppointmentsLWCCtr = new AppointmentsLWCCtr();
 
         System.assertEquals(2, Database.query(TestDataMethods.doctorsAssertion).size());
 
@@ -121,7 +121,7 @@ public class AppointmentsControllerLWCTest {
     /*** ---------- Test getDoctors method ---------- ***/
     @isTest
     static void testGetDoctorsMethod() {
-        List<Doctor__c> testDoctorsList = AppointmentsControllerLWC.getDoctors();
+        List<Doctor__c> testDoctorsList = AppointmentsLWCCtr.getDoctors();
 
         System.assertEquals(2, testDoctorsList.size());
     }
@@ -129,7 +129,7 @@ public class AppointmentsControllerLWCTest {
     /*** ---------- Test getPatients method ---------- ***/
     @isTest
     static void testGetPatientsMethod() {
-        List<Patient__c> testPatientsList = AppointmentsControllerLWC.getPatients();
+        List<Patient__c> testPatientsList = AppointmentsLWCCtr.getPatients();
 
         System.assertEquals(2, testPatientsList.size());
     }
@@ -137,9 +137,9 @@ public class AppointmentsControllerLWCTest {
     /*** ---------- Test getWorkingHours method ---------- ***/
     @isTest
     static void testGetWorkingHoursMethod() {
-        selectedDoctor = AppointmentsControllerLWC.getDoctors().get(0).Id;
+        selectedDoctor = AppointmentsLWCCtr.getDoctors().get(0).Id;
 
-        List<Doctor__c> testWorkingHoursList = AppointmentsControllerLWC.getWorkingHours(selectedDoctor);
+        List<Doctor__c> testWorkingHoursList = AppointmentsLWCCtr.getWorkingHours(selectedDoctor);
 
         Time hoursStart = testWorkingHoursList.get(0).Working_Hours_Start__c;
         Time hoursEnd = testWorkingHoursList.get(0).Working_Hours_End__c;
@@ -151,25 +151,25 @@ public class AppointmentsControllerLWCTest {
     /*** ---------- Test getAppointments method variations and wrapper class ---------- ***/
     @isTest
     static void testGetAppointmentsMehodWithoutClauses() {
-        testWrapper = AppointmentsControllerLWC.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsLWCCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(5, testWrapper.appointments.size());
     }
 
     @isTest
     static void testGetAppointmentsMehodWithSelectedDoctor() {
-        selectedDoctor = AppointmentsControllerLWC.getDoctors().get(0).Id;
+        selectedDoctor = AppointmentsLWCCtr.getDoctors().get(0).Id;
 
-        testWrapper = AppointmentsControllerLWC.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsLWCCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(2, testWrapper.appointments.size());
     }
 
     @isTest
     static void testGetAppointmentsMehodWithSelectedPatient() {
-        selectedPatient = AppointmentsControllerLWC.getPatients().get(1).Id;
+        selectedPatient = AppointmentsLWCCtr.getPatients().get(1).Id;
 
-        testWrapper = AppointmentsControllerLWC.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsLWCCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(3, testWrapper.appointments.size());
     }
@@ -180,7 +180,7 @@ public class AppointmentsControllerLWCTest {
 
         selectedDatetime = testDatetime;
 
-        testWrapper = AppointmentsControllerLWC.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsLWCCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(2, testWrapper.appointments.size());
     }
@@ -189,7 +189,7 @@ public class AppointmentsControllerLWCTest {
     static void testGetAppointmentsMehodWithSelectedDuration() {
         selectedDuration = '15';
 
-        testWrapper = AppointmentsControllerLWC.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsLWCCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(3, testWrapper.appointments.size());
     }
@@ -198,12 +198,12 @@ public class AppointmentsControllerLWCTest {
     static void testGetAppointmentsMehodWithAllClauses() {
         String testDatetime = '2021-02-02T15:28:26.048Z';
 
-        selectedDoctor = AppointmentsControllerLWC.getDoctors().get(0).Id;
-        selectedPatient = AppointmentsControllerLWC.getPatients().get(1).Id;
+        selectedDoctor = AppointmentsLWCCtr.getDoctors().get(0).Id;
+        selectedPatient = AppointmentsLWCCtr.getPatients().get(1).Id;
         selectedDatetime = testDatetime;
         selectedDuration = '40';
 
-        testWrapper = AppointmentsControllerLWC.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsLWCCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(1, testWrapper.appointments.size());
     }
@@ -213,12 +213,12 @@ public class AppointmentsControllerLWCTest {
     static void testSaveAppointmentMehod() {
         String testDatetime = '2021-02-02T09:00:00.000Z';
 
-        selectedDoctor = AppointmentsControllerLWC.getDoctors().get(0).Id;
-        selectedPatient = AppointmentsControllerLWC.getPatients().get(1).Id;
+        selectedDoctor = AppointmentsLWCCtr.getDoctors().get(0).Id;
+        selectedPatient = AppointmentsLWCCtr.getPatients().get(1).Id;
         selectedDatetime = testDatetime;
         selectedDuration = '5';
 
-        AppointmentsControllerLWC.saveAppointment(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration);
+        AppointmentsLWCCtr.saveAppointment(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration);
 
         System.assertEquals(6, Database.query(TestDataMethods.appointmentsAssertion).size());
     }
@@ -230,7 +230,7 @@ public class AppointmentsControllerLWCTest {
 
         String serializedAppointmentToDelete = JSON.serialize(appointmentToDelete);
 
-        AppointmentsControllerLWC.deleteAppointment(serializedAppointmentToDelete);
+        AppointmentsLWCCtr.deleteAppointment(serializedAppointmentToDelete);
 
         System.assertEquals(4, Database.query(TestDataMethods.appointmentsAssertion).size());
     }

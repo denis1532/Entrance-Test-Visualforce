@@ -1,5 +1,5 @@
 @isTest
-public class AppointmentsControllerAuraTest {
+public class AppointmentsAuraCtrTest {
 
     @TestSetup
     static void testData() {
@@ -58,7 +58,7 @@ public class AppointmentsControllerAuraTest {
         insert TestAppointment5;
     }
 
-    public static AppointmentsControllerAura.AppointmentsDatatableWrapper testWrapper = new AppointmentsControllerAura.AppointmentsDatatableWrapper();
+    public static AppointmentsAuraCtr.AppointmentsDatatableWrapper testWrapper = new AppointmentsAuraCtr.AppointmentsDatatableWrapper();
 
     public static String selectedDoctor = '';
     public static String selectedPatient = '';
@@ -71,7 +71,7 @@ public class AppointmentsControllerAuraTest {
     /*** ---------- Test controller ---------- ***/
     @isTest
     static void testAppointmentsController() {
-        AppointmentsControllerAura TestAppointmentsControllerAura = new AppointmentsControllerAura();
+        AppointmentsAuraCtr TestAppointmentsAuraCtr = new AppointmentsAuraCtr();
 
         System.assertEquals(2, Database.query(TestDataMethods.doctorsAssertion).size());
 
@@ -83,7 +83,7 @@ public class AppointmentsControllerAuraTest {
     /*** ---------- Test getDoctors method ---------- ***/
     @isTest
     static void testGetDoctorsMethodAAA() {
-        List<Doctor__c> testDoctorsList = AppointmentsControllerAura.getDoctors();
+        List<Doctor__c> testDoctorsList = AppointmentsAuraCtr.getDoctors();
 
         System.assertEquals(2, testDoctorsList.size());
     }
@@ -91,7 +91,7 @@ public class AppointmentsControllerAuraTest {
     /*** ---------- Test getPatients method ---------- ***/
     @isTest
     static void testGetPatientsMethod() {
-        List<Patient__c> testPatientsList = AppointmentsControllerAura.getPatients();
+        List<Patient__c> testPatientsList = AppointmentsAuraCtr.getPatients();
 
         System.assertEquals(2, testPatientsList.size());
     }
@@ -99,9 +99,9 @@ public class AppointmentsControllerAuraTest {
     /*** ---------- Test getWorkingHours method ---------- ***/
     @isTest
     static void testGetWorkingHoursMethod() {
-        selectedDoctor = AppointmentsControllerAura.getDoctors().get(0).Id;
+        selectedDoctor = AppointmentsAuraCtr.getDoctors().get(0).Id;
 
-        List<Doctor__c> testWorkingHoursList = AppointmentsControllerAura.getWorkingHours(selectedDoctor);
+        List<Doctor__c> testWorkingHoursList = AppointmentsAuraCtr.getWorkingHours(selectedDoctor);
 
         Time hoursStart = testWorkingHoursList.get(0).Working_Hours_Start__c;
         Time hoursEnd = testWorkingHoursList.get(0).Working_Hours_End__c;
@@ -113,25 +113,25 @@ public class AppointmentsControllerAuraTest {
     /*** ---------- Test getAppointments method variations and wrapper class ---------- ***/
     @isTest
     static void testGetAppointmentsMehodWithoutClauses() {
-        testWrapper = AppointmentsControllerAura.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsAuraCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(5, testWrapper.appointments.size());
     }
 
     @isTest
     static void testGetAppointmentsMehodWithSelectedDoctor() {
-        selectedDoctor = AppointmentsControllerAura.getDoctors().get(0).Id;
+        selectedDoctor = AppointmentsAuraCtr.getDoctors().get(0).Id;
 
-        testWrapper = AppointmentsControllerAura.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsAuraCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(2, testWrapper.appointments.size());
     }
 
     @isTest
     static void testGetAppointmentsMehodWithSelectedPatient() {
-        selectedPatient = AppointmentsControllerAura.getPatients().get(1).Id;
+        selectedPatient = AppointmentsAuraCtr.getPatients().get(1).Id;
 
-        testWrapper = AppointmentsControllerAura.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsAuraCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(3, testWrapper.appointments.size());
     }
@@ -142,7 +142,7 @@ public class AppointmentsControllerAuraTest {
 
         selectedDatetime = testDatetime;
 
-        testWrapper = AppointmentsControllerAura.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsAuraCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(2, testWrapper.appointments.size());
     }
@@ -151,7 +151,7 @@ public class AppointmentsControllerAuraTest {
     static void testGetAppointmentsMehodWithSelectedDuration() {
         selectedDuration = '15';
 
-        testWrapper = AppointmentsControllerAura.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsAuraCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(3, testWrapper.appointments.size());
     }
@@ -160,12 +160,12 @@ public class AppointmentsControllerAuraTest {
     static void testGetAppointmentsMehodWithAllClauses() {
         String testDatetime = '2021-02-02T15:28:26.048Z';
 
-        selectedDoctor = AppointmentsControllerAura.getDoctors().get(0).Id;
-        selectedPatient = AppointmentsControllerAura.getPatients().get(1).Id;
+        selectedDoctor = AppointmentsAuraCtr.getDoctors().get(0).Id;
+        selectedPatient = AppointmentsAuraCtr.getPatients().get(1).Id;
         selectedDatetime = testDatetime;
         selectedDuration = '40';
 
-        testWrapper = AppointmentsControllerAura.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
+        testWrapper = AppointmentsAuraCtr.getAppointments(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration, pageNumber, pageSize);
 
         System.assertEquals(1, testWrapper.appointments.size());
     }
@@ -175,12 +175,12 @@ public class AppointmentsControllerAuraTest {
     static void testSaveAppointmentMehod() {
         String testDatetime = '2021-02-02T09:00:00.000Z';
 
-        selectedDoctor = AppointmentsControllerAura.getDoctors().get(0).Id;
-        selectedPatient = AppointmentsControllerAura.getPatients().get(1).Id;
+        selectedDoctor = AppointmentsAuraCtr.getDoctors().get(0).Id;
+        selectedPatient = AppointmentsAuraCtr.getPatients().get(1).Id;
         selectedDatetime = testDatetime;
         selectedDuration = '5';
 
-        AppointmentsControllerAura.saveAppointment(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration);
+        AppointmentsAuraCtr.saveAppointment(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration);
 
         System.assertEquals(6, Database.query(TestDataMethods.appointmentsAssertion).size());
     }
@@ -192,7 +192,7 @@ public class AppointmentsControllerAuraTest {
 
         String serializedAppointmentToDelete = JSON.serialize(appointmentToDelete);
 
-        AppointmentsControllerAura.deleteAppointment(serializedAppointmentToDelete);
+        AppointmentsAuraCtr.deleteAppointment(serializedAppointmentToDelete);
 
         System.assertEquals(4, Database.query(TestDataMethods.appointmentsAssertion).size());
     }

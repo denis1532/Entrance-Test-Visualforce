@@ -164,6 +164,10 @@
                                  data={appointments}
                                  columns={columns}
                                  hide-checkbox-column="true"
+                                 default-sort-direction={defaultSortDirection}
+                                 sorted-direction={sortedDirection}
+                                 sorted-by={sortedBy}
+                                 onsort={handleSort}
                                  onrowaction={handleRowAction}>
             </lightning-datatable>
             <div class="slds-clearfix">
@@ -190,10 +194,10 @@
         </template>
         <template if:false={displayData}>
             <lightning-layout>
-                    <p class="slds-p-around_medium" >
-                        <span style="font-size: 1rem; font-weight: bold; color: red" >No appointments found matching the selected criteria</span>
-                    </p>
-                </lightning-layout>
+                <p class="slds-p-around_medium" >
+                    <span style="font-size: 1rem; font-weight: bold; color: red" >No appointments found matching the selected criteria</span>
+                </p>
+            </lightning-layout>
         </template>
     </lightning-card>
 </template>

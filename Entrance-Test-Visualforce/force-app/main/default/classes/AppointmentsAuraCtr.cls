@@ -1,4 +1,4 @@
-public class AppointmentsControllerLWC {
+public class AppointmentsAuraCtr {
 
     @TestVisible
     private class AppointmentsDatatableWrapper {
@@ -21,29 +21,23 @@ public class AppointmentsControllerLWC {
         public List<Appointment__c> appointments { get; set; }
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Doctor__c> getDoctors() {
-        List<Doctor__c> doctors = [SELECT Id, Name, Working_Hours_Start__c, Working_Hours_End__c
-                                   FROM Doctor__c
-                                   ORDER BY Name
-                                   LIMIT 50000];
+        List<Doctor__c> doctors = [SELECT Id, Name, Working_Hours_Start__c, Working_Hours_End__c FROM Doctor__c ORDER BY Name LIMIT 50000];
 
         return doctors;
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Patient__c> getPatients() {
-        List<Patient__c> patients = [SELECT Id, Name
-                                     FROM Patient__c
-                                     ORDER BY Name
-                                     LIMIT 50000];
+        List<Patient__c> patients = [SELECT Id, Name FROM Patient__c ORDER BY Name LIMIT 50000];
 
         return patients;
     }
 
-    @AuraEnabled(cacheable=true)
-    public static AppointmentsDatatableWrapper getAppointments(String selectedDoctor, String selectedPatient, String selectedDatetime, String selectedDuration, Integer pageNumber, Integer pageSize) {
-        String condition = generateConditionString(selectedDoctor, selectedPatient, selectedDatetime, selectedDuration);
+    @AuraEnabled
+    public static AppointmentsDatatableWrapper getAppointments(String selectedDoctor, String selectedPatient, String selectedDate, String selectedDuration, Integer pageNumber, Integer pageSize) {
+        String condition = generateConditionString(selectedDoctor, selectedPatient, selectedDate, selectedDuration);
         String countQuery = generateCountQuery(condition);
         String query = generateQuery(condition);
 
@@ -61,12 +55,14 @@ public class AppointmentsControllerLWC {
         query += ' LIMIT ' + pageSize;
         query += ' OFFSET ' + offset;
 
+System.debug(query);
+
         appointmentWrapper.appointments = Database.query(query);
 
         return appointmentWrapper;
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Doctor__c> getWorkingHours(String selectedDoctor) {
         String query = generateWorkingHoursQuery(selectedDoctor);
 
@@ -75,7 +71,7 @@ public class AppointmentsControllerLWC {
         return workingHours;
     }
 
-    @AuraEnabled(cacheable=false)
+    @AuraEnabled
     public static Appointment__c saveAppointment(String selectedDoctor, String selectedPatient, String selectedDate, String selectedDuration) {
         Appointment__c newAppointment = new Appointment__c(
             Doctor__c = selectedDoctor,
@@ -84,50 +80,18 @@ public class AppointmentsControllerLWC {
             Duration_in_minutes__c = (Decimal)JSON.deserialize(selectedDuration, Decimal.class)
         );
 
+        system.debug(newAppointment);
+
         insert newAppointment;
 
         return newAppointment;
     }
 
-    @AuraEnabled(cacheable=false)
+    @AuraEnabled
     public static void deleteAppointment(String appointmentToDelete) {
         Appointment__c appointment = (Appointment__c)JSON.deserialize(appointmentToDelete, Appointment__c.class);
 
         delete appointment;
-    }
-
-    private static String generateConditionString(String selectedDoctor, String selectedPatient, String selectedDatetime, String selectedDuration) {
-        String conditionString = '';
-
-        String firstFilter = firstFilter(selectedDoctor, selectedPatient);
-        String secondFilter = secondFilter(selectedDatetime);
-        String thirdFilter = thirdFilter(selectedDuration);
-
-        if (!String.isEmpty(firstFilter)) {
-            conditionString = '(' + firstFilter + ')';
-        }
-
-        if (!String.isEmpty(secondFilter)) {
-            conditionString = '(' + secondFilter + ')';
-        }
-
-        if (!String.isEmpty(thirdFilter)) {
-            conditionString = '(' + thirdFilter + ')';
-        }
-
-        if (!String.isEmpty(firstFilter) && !String.isEmpty(secondFilter)) {
-            conditionString = '(' + firstFilter + ') AND (' + secondFilter + ')';
-        }
-
-        if (!String.isEmpty(firstFilter) && !String.isEmpty(thirdFilter)) {
-            conditionString = '(' + firstFilter + ') AND (' + thirdFilter + ')';
-        }
-
-        if (!String.isEmpty(firstFilter) && !String.isEmpty(secondFilter) && !String.isEmpty(thirdFilter)) {
-            conditionString = '(' + firstFilter + ') AND (' + secondFilter + ') AND (' + thirdFilter + ')';
-        }
-
-        return conditionString;
     }
 
     private static String firstFilter(String selectedDoctor, String selectedPatient) {
@@ -155,13 +119,13 @@ public class AppointmentsControllerLWC {
         return firstFilter;
     }
 
-    private static String secondFilter(String selectedDatetime) {
-System.debug('Initial: ' + selectedDatetime);
+    private static String secondFilter(String selectedDate) {
+System.debug('Initial: ' + selectedDate);
 
         string secondFilter = '';
 
-        if(!String.isEmpty(selectedDatetime)) {
-            Datetime deserializedDatetime = (Datetime)JSON.deserialize('"' + selectedDatetime + '"', DateTime.class);
+        if(!String.isEmpty(selectedDate)) {
+            Datetime deserializedDatetime = (Datetime)JSON.deserialize('"' + selectedDate + '"', DateTime.class);
 
 System.debug('Deserialized: ' + deserializedDatetime);
 System.debug('Deserialized .day(): ' + deserializedDatetime.dayGmt());
@@ -204,8 +168,8 @@ System.debug('Higher (+1 day): ' + higherDatetime);
 
             secondFilter = 'Appointment_Date__c >= ' + formattedLower + ' AND Appointment_Date__c < ' + formattedHigher;
 
-            // почему Datetime dt = (Datetime)JSON.deserialize(selectedDatetime, DateTime.class); возвращает 2021-01-01 00:00:00
-            // а Datetime dt = (Datetime)JSON.deserialize('"' + selectedDatetime + '"', DateTime.class); возвращает нормальную дату и время
+            // почему Datetime dt = (Datetime)JSON.deserialize(selectedDate, DateTime.class); возвращает 2021-01-01 00:00:00
+            // а Datetime dt = (Datetime)JSON.deserialize('"' + selectedDate + '"', DateTime.class); возвращает нормальную дату и время
         }
 
 System.debug(secondFilter);
@@ -221,6 +185,40 @@ System.debug(secondFilter);
         }
 
         return thirdFilter;
+    }
+
+    private static String generateConditionString(String selectedDoctor, String selectedPatient, String selectedDate, String selectedDuration) {
+        String conditionString = '';
+
+        String firstFilter = firstFilter(selectedDoctor, selectedPatient);
+        String secondFilter = secondFilter(selectedDate);
+        String thirdFilter = thirdFilter(selectedDuration);
+
+        if (!String.isEmpty(firstFilter)) {
+            conditionString = '(' + firstFilter + ')';
+        }
+
+        if (!String.isEmpty(secondFilter)) {
+            conditionString = '(' + secondFilter + ')';
+        }
+
+        if (!String.isEmpty(thirdFilter)) {
+            conditionString = '(' + thirdFilter + ')';
+        }
+
+        if (!String.isEmpty(firstFilter) && !String.isEmpty(secondFilter)) {
+            conditionString = '(' + firstFilter + ') AND (' + secondFilter + ')';
+        }
+
+        if (!String.isEmpty(firstFilter) && !String.isEmpty(thirdFilter)) {
+            conditionString = '(' + firstFilter + ') AND (' + thirdFilter + ')';
+        }
+
+        if (!String.isEmpty(firstFilter) && !String.isEmpty(secondFilter) && !String.isEmpty(thirdFilter)) {
+            conditionString = '(' + firstFilter + ') AND (' + secondFilter + ') AND (' + thirdFilter + ')';
+        }
+
+        return conditionString;
     }
 
     private static String generateQuery(String condition) {
@@ -256,5 +254,4 @@ System.debug(secondFilter);
 
         return generatedWorkingHoursQuery;
     }
-
 }

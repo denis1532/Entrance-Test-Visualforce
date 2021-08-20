@@ -1,6 +1,6 @@
 <aura:component implements="force:appHostable"
                 access="global"
-                controller="AppointmentsControllerAura" >
+                controller="AppointmentsAuraCtr" >
 
     <aura:attribute name="data" type="Object" access="PRIVATE" />
     <aura:attribute name="displayData" type="Boolean" access="PRIVATE" />
